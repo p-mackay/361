@@ -1,0 +1,40 @@
+\documentclass{article}
+\usepackage{enumerate}
+\usepackage{titling}
+\usepackage{listings}
+\usepackage{changepage}
+\usepackage[margin=0.75in]{geometry}
+
+\lstset{
+    basicstyle=\ttfamily,
+    breaklines=true,
+    columns=fullflexible
+}
+
+\setlength{\droptitle}{-2cm}
+\title{CSC361: Assignment 3 (a3)}
+\author{Paul MacKay}
+
+\begin{document}
+
+\maketitle
+
+
+\section{}
+Given that the server is non-blocking and uses select() 
+the server does not wait (block) until an operation is complete rather it continues 
+to process requests even if one request is hanging. 
+
+\section{}
+\subsection{}
+Using the select() function. When a client connects to the server, a socket is opened,
+and appended to the client\_socket list. The server checks the entries in this list 
+to see if there are any requests from these sockets.  
+\subsection{}
+If no data has been requested through the socket within 30-seconds then the socket is closed.
+
+\section{}
+Using the select() function even if the requests are sent back to back, the client\_sockets 
+list can be checked for any new requests.
+
+\end{document}

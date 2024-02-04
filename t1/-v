@@ -1,0 +1,7 @@
+GET /small.html HTTP/1.1
+Host: 127.0.0.1:9000
+User-Agent: Wget/1.21.4
+Accept: */*
+Accept-Encoding: identity
+Connection: Keep-Alive
+

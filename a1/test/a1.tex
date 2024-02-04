@@ -1,0 +1,967 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% University/School Laboratory Report
+% LaTeX Template
+% Version 4.0 (March 21, 2022)
+%
+% This template originates from:
+% https://www.LaTeXTemplates.com
+%
+% Authors:
+% Vel (vel@latextemplates.com)
+% Linux and Unix Users Group at Virginia Tech Wiki
+%
+% License:
+% CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[
+	letterpaper, % Paper size, specify a4paper (A4) or letterpaper (US letter)
+	10pt, % Default font size, specify 10pt, 11pt or 12pt
+]{CSUniSchoolLabReport}
+
+\addbibresource{sample.bib} % Bibliography file (located in the same folder as the template)
+\usepackage{listings}
+
+%----------------------------------------------------------------------------------------
+%	REPORT INFORMATION
+%----------------------------------------------------------------------------------------
+
+\title{Assignment 1 (a1)\\ CSC 361} % Report title
+
+\author{Paul \textsc{MacKay} V00967869} % Author name(s), add additional authors like: '\& James \textsc{Smith}'
+
+\date{\today} % Date of the report
+
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle % Insert the title, author and date using the information specified above
+
+
+% If you need to include an abstract, uncomment the lines below
+%\begin{abstract}
+%	Abstract text
+%\end{abstract}
+
+%----------------------------------------------------------------------------------------
+%	OBJECTIVE
+%----------------------------------------------------------------------------------------
+
+\section{}
+
+
+\subsection{\$ traceroute}
+\begin{center}
+\begin{verbatim}
+traceroute to 8.8.8.8 (8.8.8.8), 30 hops max, 60 byte packets
+ 1  _gateway (10.0.0.1)  41.554 ms  43.934 ms  43.863 ms
+ 2  24.68.0.1 (24.68.0.1)  48.459 ms  53.433 ms  53.724 ms
+ 3  rd1cv-be124-1.gv.shawcable.net (64.59.162.113)  56.098 ms  56.037 ms  55.979 ms
+ 4  24.244.62.1 (24.244.62.1)  54.196 ms  53.789 ms  54.277 ms
+ 5  24.244.61.109 (24.244.61.109)  53.304 ms  53.605 ms  54.816 ms
+ 6  rd1lp-be1.gv.shawcable.net (66.163.72.22)  58.942 ms  13.502 ms  13.232 ms
+ 7  rc1wt-be40.wa.shawcable.net (66.163.68.18)  15.786 ms  13.162 ms  14.161 ms
+ 8  72.14.221.102 (72.14.221.102)  20.696 ms  21.705 ms  21.147 ms
+ 9  * * *
+10  dns.google (8.8.8.8)  19.982 ms  19.919 ms  19.859 ms
+
+\end{verbatim}
+\end{center}
+
+\newpage
+\subsection{\$ whois 8.8.8.8}
+\begin{verbatim}
+#!/bin/bash
+
+ips=(
+"
+10.0.0.1
+24.68.0.1
+64.59.162.113
+24.244.62.1
+24.244.61.109
+66.163.72.22
+66.163.68.18
+72.14.221.102
+8.8.8.8
+"
+)
+
+for ip in $ips; do
+    whois "$ip" | grep -i orgname
+done
+\end{verbatim}
+
+\textbf{Output: }
+\begin{verbatim}
+OrgName:        Internet Assigned Numbers Authority
+OrgName:        Shaw Communications Inc.
+OrgName:        Shaw Communications Inc.
+OrgName:        Shaw Communications Inc.
+OrgName:        Shaw Communications Inc.
+OrgName:        Shaw Communications Inc.
+OrgName:        Shaw Communications Inc.
+OrgName:        Google LLC
+OrgName:        Google LLC
+
+\end{verbatim}
+\newpage
+
+\subsection{How to get there? IP geolocations: }
+
+\textbf{Victoria -> Toronto -> Edmonton -> Edmonton -> Surrey/Vancouver -> 
+Surrey/Vancouver -> Chicago -> Chicago}
+\begin{center}
+\begin{verbatim}
+
+#!/bin/bash
+
+ips=(
+"
+10.0.0.1
+24.68.0.1
+64.59.162.113
+24.244.62.1
+24.244.61.109
+66.163.72.22
+66.163.68.18
+72.14.221.102
+8.8.8.8
+"
+)
+
+for ip in $ips; do
+    echo "$ip"
+    whois "$ip" | grep -i organization 
+    lynx -dump "https://tools.keycdn.com/geo?host=$ip" | sed -n '/   Location/,/   ASN/p'
+    echo "--------------------------------------------------------------------"
+done
+
+\end{verbatim}
+\end{center}
+
+\textbf{Output: }
+
+\begin{center}
+\begin{verbatim}
+10.0.0.1
+Organization:   Internet Assigned Numbers Authority (IANA)
+Comment:        These addresses were assigned by the IETF, the organization that develops Internet protocols, in the Best Current Practice document, RFC 1918 which can be found at:
+--------------------------------------------------------------------
+24.68.0.1
+Organization:   Shaw Communications Inc. (SHAWC)
+   Location
+
+   City
+          Victoria
+
+   Region
+          British Columbia (BC)
+
+   Postal code
+          V8Z
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          48.4983 (lat) / -123.4005 (long)
+
+   Time
+          2024-01-20 03:39:54 (America/Vancouver)
+
+   Network
+
+   IP address
+          24.68.0.1
+
+   Hostname
+          24.68.0.1
+
+   Provider
+          SHAW
+
+   ASN
+--------------------------------------------------------------------
+64.59.162.113
+Organization:   Shaw Communications Inc. (SHAWC-1)
+   Location
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          43.6319 (lat) / -79.3716 (long)
+
+   Time
+          2024-01-20 06:39:55 (America/Toronto)
+
+   Network
+
+   IP address
+          64.59.162.113
+
+   Hostname
+          rd1cv-be124-1.gv.shawcable.net
+
+   Provider
+          SHAW
+
+   ASN
+--------------------------------------------------------------------
+24.244.62.1
+Organization:   Shaw Communications Inc. (SHAWC-1)
+   Location
+
+   City
+          Edmonton
+
+   Region
+          Alberta (AB)
+
+   Postal code
+          T5Y
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          53.655 (lat) / -113.3784 (long)
+
+   Time
+          2024-01-20 04:39:57 (America/Edmonton)
+
+   Network
+
+   IP address
+          24.244.62.1
+
+   Hostname
+          24.244.62.1
+
+   Provider
+          SHAW
+
+   ASN
+--------------------------------------------------------------------
+24.244.61.109
+Organization:   Shaw Communications Inc. (SHAWC-1)
+   Location
+
+   City
+          Edmonton
+
+   Region
+          Alberta (AB)
+
+   Postal code
+          T5Y
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          53.655 (lat) / -113.3784 (long)
+
+   Time
+          2024-01-20 04:39:59 (America/Edmonton)
+
+   Network
+
+   IP address
+          24.244.61.109
+
+   Hostname
+          24.244.61.109
+
+   Provider
+          SHAW
+
+   ASN
+--------------------------------------------------------------------
+66.163.72.22
+Organization:   Shaw Communications Inc. (SHAWC-2)
+   Location
+
+   City
+          Surrey
+
+   Region
+          British Columbia (BC)
+
+   Postal code
+          V3Z
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          49.1049 (lat) / -122.824 (long)
+
+   Time
+          2024-01-20 03:40:00 (America/Vancouver)
+
+   Network
+
+   IP address
+          66.163.72.22
+
+   Hostname
+          rd1lp-be1.gv.shawcable.net
+
+   Provider
+          SHAW
+
+   ASN
+--------------------------------------------------------------------
+66.163.68.18
+Organization:   Shaw Communications Inc. (SHAWC-2)
+   Location
+
+   City
+          Surrey
+
+   Region
+          British Columbia (BC)
+
+   Postal code
+          V3Z
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          49.1049 (lat) / -122.824 (long)
+
+   Time
+          2024-01-20 03:40:02 (America/Vancouver)
+
+   Network
+
+   IP address
+          66.163.68.18
+
+   Hostname
+          rc1wt-be40.wa.shawcable.net
+
+   Provider
+          SHAW
+
+   ASN
+--------------------------------------------------------------------
+72.14.221.102
+Organization:   Google LLC (GOGL)
+   Location
+
+   Country
+          United States (US)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          37.751 (lat) / -97.822 (long)
+
+   Time
+          2024-01-20 05:40:03 (America/Chicago)
+
+   Network
+
+   IP address
+          72.14.221.102
+
+   Hostname
+          72.14.221.102
+
+   Provider
+          GOOGLE
+
+   ASN
+--------------------------------------------------------------------
+8.8.8.8
+Organization:   Google LLC (GOGL)
+   Location
+
+   Country
+          United States (US)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          37.751 (lat) / -97.822 (long)
+
+   Time
+          2024-01-20 05:40:05 (America/Chicago)
+
+   Network
+
+   IP address
+          8.8.8.8
+
+   Hostname
+          dns.google
+
+   Provider
+          GOOGLE
+
+   ASN
+--------------------------------------------------------------------
+
+\end{verbatim}
+\end{center}
+\newpage
+
+\section{Setting up PicoLab}
+\section{Using PicoLab}
+
+\subsection{tcpdump on R when H2 pings H1}
+
+\begin{center}
+\begin{verbatim}
+12:41:32.671600 IP 192.168.1.100 > 10.10.1.100: ICMP echo request, id 654, seq 1, length 64
+12:41:32.671608 IP 10.10.1.100 > 192.168.1.100: ICMP echo reply, id 654, seq 1, length 64
+12:41:33.695017 IP 192.168.1.100 > 10.10.1.100: ICMP echo request, id 654, seq 2, length 64
+12:41:33.695036 IP 10.10.1.100 > 192.168.1.100: ICMP echo reply, id 654, seq 2, length 64
+12:41:34.719034 IP 192.168.1.100 > 10.10.1.100: ICMP echo request, id 654, seq 3, length 64
+12:41:34.719055 IP 10.10.1.100 > 192.168.1.100: ICMP echo reply, id 654, seq 3, length 64
+12:41:37.727084 ARP, Request who-has 10.10.1.1 tell 10.10.1.100, length 28
+12:41:37.727095 ARP, Request who-has 10.10.1.100 tell 10.10.1.1, length 28
+12:41:37.727246 ARP, Reply 10.10.1.100 is-at 72:9c:85:8b:c3:05, length 28
+12:41:37.727240 ARP, Reply 10.10.1.1 is-at 8a:ae:c2:57:79:88, length 28
+\end{verbatim}
+\end{center}
+
+In the above tcpdump we can observe the 3 packets that were sent from H1 to 
+H2. For each of the three packets, H1 sends a request to H2, then H2 sends a reply back to H1.
+Then R uses ARP to resolve the MAC addresses for H1 and H2.
+
+\section{}
+
+\subsection{tcpdump on PicoNet}
+\begin{center}
+\begin{verbatim}
+13:22:42.751101 IP6 fe80::8470:8ff:feaa:6573 > ff02::2: ICMP6, router solicitation, length 16
+13:22:43.465922 ARP, Request who-has 172.16.1.2 tell 172.16.1.1, length 28
+13:22:43.465953 ARP, Reply 172.16.1.2 is-at b6:fd:be:97:3f:a7, length 28
+13:22:43.465961 IP 172.16.1.1.34108 > 8.8.8.8.33434: UDP, length 32
+13:22:43.466090 IP 172.16.1.2 > 172.16.1.1: ICMP time exceeded in-transit, length 68
+13:22:43.466192 IP 172.16.1.1.53658 > 8.8.8.8.33435: UDP, length 32
+13:22:43.466213 IP 172.16.1.2 > 172.16.1.1: ICMP time exceeded in-transit, length 68
+13:22:43.466262 IP 172.16.1.1.41879 > 8.8.8.8.33436: UDP, length 32
+13:22:43.466275 IP 172.16.1.2 > 172.16.1.1: ICMP time exceeded in-transit, length 68
+13:22:43.466319 IP 172.16.1.1.51362 > 8.8.8.8.33437: UDP, length 32
+13:22:43.466392 IP 172.17.0.1 > 172.16.1.1: ICMP time exceeded in-transit, length 68
+13:22:43.466442 IP 172.16.1.1.33678 > 8.8.8.8.33438: UDP, length 32
+13:22:43.466476 IP 172.17.0.1 > 172.16.1.1: ICMP time exceeded in-transit, length 68
+13:22:43.466525 IP 172.16.1.1.38907 > 8.8.8.8.33439: UDP, length 32
+13:22:43.466569 IP 172.17.0.1 > 172.16.1.1: ICMP time exceeded in-transit, length 68
+13:22:43.466617 IP 172.16.1.1.38131 > 8.8.8.8.33440: UDP, length 32
+13:22:43.466720 IP 172.16.1.1.38105 > 8.8.8.8.33441: UDP, length 32
+13:22:43.466854 IP 172.16.1.1.45537 > 8.8.8.8.33442: UDP, length 32
+13:22:43.466979 IP 192.168.122.1 > 172.16.1.1: ICMP time exceeded in-transit, length 68
+13:22:43.466985 IP 192.168.122.1 > 172.16.1.1: ICMP time exceeded in-transit, length 68
+13:22:43.467029 IP 192.168.122.1 > 172.16.1.1: ICMP time exceeded in-transit, length 68
+13:22:43.467079 IP 172.16.1.1.39806 > 8.8.8.8.33443: UDP, length 32
+13:22:43.467165 IP 172.16.1.1.42635 > 8.8.8.8.33444: UDP, length 32
+13:22:43.467252 IP 172.16.1.1.60579 > 8.8.8.8.33445: UDP, length 32
+13:22:43.467394 IP 172.16.1.1.36598 > 8.8.8.8.33446: UDP, length 32
+13:22:43.467484 IP 172.16.1.1.52260 > 8.8.8.8.33447: UDP, length 32
+13:22:43.467571 IP 172.16.1.1.33826 > 8.8.8.8.33448: UDP, length 32
+13:22:43.467674 IP 172.16.1.1.44627 > 8.8.8.8.33449: UDP, length 32
+13:22:43.467806 IP 142.104.74.65 > 172.16.1.1: ICMP time exceeded in-transit, length 36
+13:22:43.467816 IP 142.104.74.65 > 172.16.1.1: ICMP time exceeded in-transit, length 36
+13:22:43.468016 IP 142.104.74.65 > 172.16.1.1: ICMP time exceeded in-transit, length 36
+13:22:43.468143 IP 142.104.124.105 > 172.16.1.1: ICMP time exceeded in-transit, length 36
+13:22:43.468241 IP 142.104.124.105 > 172.16.1.1: ICMP time exceeded in-transit, length 36
+13:22:43.468248 IP 142.104.124.105 > 172.16.1.1: ICMP time exceeded in-transit, length 36
+13:22:43.468272 IP 142.104.100.241 > 172.16.1.1: ICMP time exceeded in-transit, length 36
+13:22:43.468793 IP 172.16.1.1.15322 > 192.203.230.10.53: 34671 PTR? 2.1.16.172.in-addr.arpa. (41)
+13:22:43.472778 IP 192.203.230.10.53 > 172.16.1.1.15322: 34671- 0/6/12 (417)
+13:22:43.472924 IP 172.16.1.1.15267 > 199.253.183.183.53: 53863 PTR? 2.1.16.172.in-addr.arpa. (41)
+13:22:43.649955 IP 199.253.183.183.53 > 172.16.1.1.15267: 53863- 0/6/0 (161)
+13:22:43.650347 IP 172.16.1.1.15589 > 193.0.14.129.53: 57825 A? y.arin.net. (28)
+13:22:43.655139 IP 193.0.14.129.53 > 172.16.1.1.15589: 57825- 0/13/14 (491)
+13:22:43.655541 IP 172.16.1.1.17647 > 192.5.6.30.53: 45120 A? y.arin.net. (28)
+13:22:43.661401 IP 192.5.6.30.53 > 172.16.1.1.17647: 45120- 0/4/8 (274)
+13:22:46.735709 IP 172.16.1.1.18981 > 199.71.0.108.53: 36669 [b2&3=0x80] A? y.arin.net. (28)
+13:22:46.762213 IP 199.71.0.108.53 > 172.16.1.1.18981: 36669*- 1/0/0 A 192.82.134.30 (44)
+13:22:46.762525 IP 172.16.1.1.18626 > 192.82.134.30.53: 16311 PTR? 2.1.16.172.in-addr.arpa. (41)
+13:22:46.767813 IP 192.82.134.30.53 > 172.16.1.1.18626: 16311- 0/2/0 (101)
+13:22:46.768187 IP 172.16.1.1.16005 > 192.33.4.12.53: 42905 A? blackhole-2.iana.org. (38)
+13:22:46.826895 IP 192.33.4.12.53 > 172.16.1.1.16005: 42905- 0/6/12 (446)
+13:22:46.827279 IP 172.16.1.1.18694 > 199.249.112.1.53: 30134 A? blackhole-2.iana.org. (38)
+13:22:46.830869 IP 199.249.112.1.53 > 172.16.1.1.18694: 30134- 0/4/2 (172)
+13:22:46.831222 IP 172.16.1.1.16945 > 192.55.83.30.53: 28527 A? c.iana-servers.net. (36)
+13:22:46.839556 IP 192.55.83.30.53 > 172.16.1.1.16945: 28527- 0/4/6 (240)
+13:22:46.839877 IP 172.16.1.1.16877 > 199.43.134.53.53: 45767 A? blackhole-2.iana.org. (38)
+13:22:46.875894 IP 199.43.134.53.53 > 172.16.1.1.16877: 45767*- 1/0/0 A 192.175.48.42 (54)
+13:22:46.876210 IP 172.16.1.1.17888 > 192.175.48.42.53: 60807 PTR? 2.1.16.172.in-addr.arpa. (41)
+13:22:46.881201 IP 192.175.48.42.53 > 172.16.1.1.17888: 60807 NXDomain*- 0/1/0 (118)
+13:22:46.888972 IP 172.16.1.1.15444 > 199.212.0.108.53: 40546 A? r.arin.net. (28)
+13:22:46.950429 IP 199.212.0.108.53 > 172.16.1.1.15444: 40546*- 1/0/0 A 199.180.180.63 (44)
+13:22:46.950703 IP 172.16.1.1.17253 > 199.180.180.63.53: 49190 PTR? 1.0.17.172.in-addr.arpa. (41)
+13:22:46.956438 IP 199.180.180.63.53 > 172.16.1.1.17253: 49190- 0/2/0 (120)
+13:22:48.638926 ARP, Request who-has 172.16.1.1 tell 172.16.1.2, length 28
+13:22:48.639008 ARP, Reply 172.16.1.1 is-at 86:70:08:aa:65:73, length 28
+13:22:51.894502 IP 172.16.1.1.17567 > 199.212.0.108.53: 57434 A? z.arin.net. (28)
+13:22:51.957269 IP 199.212.0.108.53 > 172.16.1.1.17567: 57434*- 1/0/0 A 199.180.180.63 (44)
+13:22:51.957528 IP 172.16.1.1.17345 > 199.180.180.63.53: 65213 PTR? 1.0.17.172.in-addr.arpa. (41)
+13:22:51.963036 IP 199.180.180.63.53 > 172.16.1.1.17345: 65213- 0/2/0 (120)
+13:22:56.899999 IP 172.16.1.1.15460 > 200.10.60.53.53: 20596 PTR? 1.122.168.192.in-addr.arpa. (44)
+13:22:57.008842 IP 200.10.60.53.53 > 172.16.1.1.15460: 20596- 0/6/0 (183)
+13:22:57.009096 IP 172.16.1.1.17677 > 204.61.216.50.53: 52490 A? x.arin.net. (28)
+13:22:57.014684 IP 204.61.216.50.53 > 172.16.1.1.17677: 52490*- 1/4/8 A 199.180.180.63 (290)
+13:22:57.014953 IP 172.16.1.1.16945 > 199.180.180.63.53: 36496 PTR? 1.122.168.192.in-addr.arpa. (44)
+13:22:57.021264 IP 199.180.180.63.53 > 172.16.1.1.16945: 36496- 0/2/0 (124)
+13:22:57.021488 IP 172.16.1.1.15713 > 192.54.112.30.53: 2067 A? a.iana-servers.net. (36)
+13:22:57.058686 IP 192.54.112.30.53 > 172.16.1.1.15713: 2067- 0/4/6 (240)
+13:23:01.902371 IP 172.16.1.1.15710 > 199.4.138.53.53: 47301 A? blackhole-1.iana.org. (38)
+13:23:01.934685 IP 199.4.138.53.53 > 172.16.1.1.15710: 47301*- 1/4/0 A 192.175.48.6 (141)
+13:23:01.934968 IP 172.16.1.1.17369 > 192.175.48.6.53: 15983 PTR? 1.122.168.192.in-addr.arpa. (44)
+13:23:01.938808 IP 192.175.48.6.53 > 172.16.1.1.17369: 15983 NXDomain*- 0/1/0 (121)
+13:23:06.908280 IP 172.16.1.1.17642 > 200.10.60.53.53: 39725 PTR? 65.74.104.142.in-addr.arpa. (44)
+13:23:07.019186 IP 200.10.60.53.53 > 172.16.1.1.17642: 39725- 0/6/0 (183)
+13:23:07.019465 IP 172.16.1.1.18378 > 192.31.80.30.53: 53867 A? arin.authdns.ripe.net. (39)
+13:23:07.025558 IP 192.31.80.30.53 > 172.16.1.1.18378: 53867- 0/5/10 (379)
+13:23:09.089178 IP 172.16.1.1.16345 > 200.3.13.14.53: 49555 [b2&3=0x80] A? arin.authdns.ripe.net. (39)
+13:23:09.270702 IP 200.3.13.14.53 > 172.16.1.1.16345: 49555*- 1/0/0 A 193.0.9.10 (55)
+13:23:09.270934 IP 172.16.1.1.17114 > 193.0.9.10.53: 31867 PTR? 65.74.104.142.in-addr.arpa. (44)
+13:23:09.401297 IP 193.0.9.10.53 > 172.16.1.1.17114: 31867- 0/3/0 (127)
+13:23:09.401545 IP 172.16.1.1.15742 > 192.228.79.201.53: 18365 A? ns3.uvic.ca. (29)
+13:23:09.433439 IP 192.228.79.201.53 > 172.16.1.1.15742: 18365- 0/4/8 (282)
+13:23:10.489357 IP 172.16.1.1.17003 > 198.182.167.1.53: 62047 [b2&3=0x80] A? ns3.uvic.ca. (29)
+13:23:10.494680 IP 198.182.167.1.53 > 172.16.1.1.17003: 62047- 0/3/3 (129)
+13:23:10.494919 IP 172.16.1.1.18389 > 216.171.224.23.53: 10098 PTR? 65.74.104.142.in-addr.arpa. (44)
+13:23:11.913723 IP 172.16.1.1.45855 > 8.8.8.8.33450: UDP, length 32
+13:23:11.913951 IP 172.16.1.1.40242 > 8.8.8.8.33451: UDP, length 32
+13:23:11.914050 IP 172.16.1.1.51496 > 8.8.8.8.33452: UDP, length 32
+
+\end{verbatim}
+\end{center}
+
+
+\subsection{traceroute on R to 8.8.8.8}
+\begin{center}
+\begin{verbatim}
+traceroute to 8.8.8.8 (8.8.8.8), 30 hops max, 60 byte packets
+ 1  172.16.1.2 (172.16.1.2)  0.206 ms  0.031 ms  0.018 ms
+ 2  172.17.0.1 (172.17.0.1)  0.079 ms  0.042 ms  0.052 ms
+ 3  192.168.122.1 (192.168.122.1)  0.369 ms  0.272 ms  0.185 ms
+ 4  142.104.74.65 (142.104.74.65)  0.736 ms  0.658 ms  0.774 ms
+ 5  142.104.124.105 (142.104.124.105)  0.759 ms  0.764 ms  0.683 ms
+ 6  142.104.100.241 (142.104.100.241)  0.606 ms  0.916 ms  0.677 ms
+ 7  cle-core-edge.bb.uvic.ca (142.104.100.189)  1.364 ms  1.280 ms  1.186 ms
+ 8  207.23.244.233 (207.23.244.233)  1.579 ms  1.501 ms  1.404 ms
+ 9  199.212.24.98 (199.212.24.98)  1.463 ms  1.676 ms  1.589 ms
+10  199.212.24.228 (199.212.24.228)  3.900 ms  3.840 ms  3.690 ms
+11  199.212.24.229 (199.212.24.229)  3.591 ms  3.496 ms  3.421 ms
+12  74.125.243.177 (74.125.243.177)  4.787 ms  4.821 ms  4.681 ms
+13  142.251.50.177 (142.251.50.177)  3.592 ms 216.239.43.231 (216.239.43.231)  4.246 ms 142.251.50.177 (142.251.50.177)  4.014 ms
+14  dns.google (8.8.8.8)  3.861 ms  3.729 ms  3.651 ms
+\end{verbatim}
+\end{center}
+
+\subsection{How to get there? geo-locations of IP's from PicoLab to 8.8.8.8}
+Using the same bashscript as part 1:
+\textbf{Victoria -> Victoria -> Victoria -> Victoria -> Toronto -> Toronto -> Toronto -> 
+Toronto -> Chicago -> Chicago - > Chicago}
+\begin{center}
+\begin{verbatim}
+172.16.1.2
+Organization:   Internet Assigned Numbers Authority (IANA)
+Comment:        These addresses were assigned by the IETF, the organization that develops Internet protocols, in the Best Current Practice document, RFC 1918 which can be found at:
+--------------------------------------------------------------------
+172.17.0.1
+Organization:   Internet Assigned Numbers Authority (IANA)
+Comment:        These addresses were assigned by the IETF, the organization that develops Internet protocols, in the Best Current Practice document, RFC 1918 which can be found at:
+--------------------------------------------------------------------
+192.168.122.1
+Organization:   Internet Assigned Numbers Authority (IANA)
+Comment:        These addresses were assigned by the IETF, the organization that develops Internet protocols, in the Best Current Practice document, RFC 1918 which can be found at:
+--------------------------------------------------------------------
+142.104.74.65
+Organization:   University of Victoria (UNIVER-183-Z)
+   Location
+
+   City
+          Victoria
+
+   Region
+          British Columbia (BC)
+
+   Postal code
+          V8P
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          48.4574 (lat) / -123.3436 (long)
+
+   Time
+          2024-01-21 16:36:28 (America/Vancouver)
+
+   Network
+
+   IP address
+          142.104.74.65
+
+   Hostname
+          n-gateway.csc.uvic.ca
+
+   Provider
+          UVIC-AS
+
+   ASN
+--------------------------------------------------------------------
+142.104.124.105
+Organization:   University of Victoria (UNIVER-183-Z)
+   Location
+
+   City
+          Victoria
+
+   Region
+          British Columbia (BC)
+
+   Postal code
+          V8R
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          48.4471 (lat) / -123.3018 (long)
+
+   Time
+          2024-01-21 16:36:30 (America/Vancouver)
+
+   Network
+
+   IP address
+          142.104.124.105
+
+   Hostname
+          142.104.124.105
+
+   Provider
+          UVIC-AS
+
+   ASN
+--------------------------------------------------------------------
+142.104.100.241
+Organization:   University of Victoria (UNIVER-183-Z)
+   Location
+
+   City
+          Victoria
+
+   Region
+          British Columbia (BC)
+
+   Postal code
+          V8Y
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          48.5249 (lat) / -123.3615 (long)
+
+   Time
+          2024-01-21 16:36:31 (America/Vancouver)
+
+   Network
+
+   IP address
+          142.104.100.241
+
+   Hostname
+          142.104.100.241
+
+   Provider
+          UVIC-AS
+
+   ASN
+--------------------------------------------------------------------
+142.104.100.189
+Organization:   University of Victoria (UNIVER-183-Z)
+   Location
+
+   City
+          Victoria
+
+   Region
+          British Columbia (BC)
+
+   Postal code
+          V8Y
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          48.5249 (lat) / -123.3615 (long)
+
+   Time
+          2024-01-21 16:36:33 (America/Vancouver)
+
+   Network
+
+   IP address
+          142.104.100.189
+
+   Hostname
+          cle-core-edge.bb.uvic.ca
+
+   Provider
+          UVIC-AS
+
+   ASN
+--------------------------------------------------------------------
+207.23.244.233
+Organization:   BCnet (BC-Z)
+   Location
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          43.6319 (lat) / -79.3716 (long)
+
+   Time
+          2024-01-21 19:36:34 (America/Toronto)
+
+   Network
+
+   IP address
+          207.23.244.233
+
+   Hostname
+          207.23.244.233
+
+   Provider
+          BCNET-AS
+
+   ASN
+--------------------------------------------------------------------
+199.212.24.98
+Organization:   CANARIE Inc (CANARI)
+   Location
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          43.6319 (lat) / -79.3716 (long)
+
+   Time
+          2024-01-21 19:36:36 (America/Toronto)
+
+   Network
+
+   IP address
+          199.212.24.98
+
+   Hostname
+          vctr3rtr1.network.canarie.ca
+
+   Provider
+          CANARIE-NTN
+
+   ASN
+--------------------------------------------------------------------
+199.212.24.228
+Organization:   CANARIE Inc (CANARI)
+   Location
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          43.6319 (lat) / -79.3716 (long)
+
+   Time
+          2024-01-21 19:36:38 (America/Toronto)
+
+   Network
+
+   IP address
+          199.212.24.228
+
+   Hostname
+          199.212.24.228
+
+   Provider
+          CANARIE-NTN
+
+   ASN
+--------------------------------------------------------------------
+199.212.24.229
+Organization:   CANARIE Inc (CANARI)
+   Location
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          43.6319 (lat) / -79.3716 (long)
+
+   Time
+          2024-01-21 19:36:39 (America/Toronto)
+
+   Network
+
+   IP address
+          199.212.24.229
+
+   Hostname
+          199.212.24.229
+
+   Provider
+          CANARIE-NTN
+
+   ASN
+--------------------------------------------------------------------
+74.125.243.177
+Organization:   Google LLC (GOGL)
+   Location
+
+   Country
+          United States (US)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          37.751 (lat) / -97.822 (long)
+
+   Time
+          2024-01-21 18:36:41 (America/Chicago)
+
+   Network
+
+   IP address
+          74.125.243.177
+
+   Hostname
+          74.125.243.177
+
+   Provider
+          GOOGLE
+
+   ASN
+--------------------------------------------------------------------
+142.251.50.177
+Organization:   Google LLC (GOGL)
+   Location
+
+   Country
+          United States (US)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          37.751 (lat) / -97.822 (long)
+
+   Time
+          2024-01-21 18:36:42 (America/Chicago)
+
+   Network
+
+   IP address
+          142.251.50.177
+
+   Hostname
+          142.251.50.177
+
+   Provider
+          GOOGLE
+
+   ASN
+--------------------------------------------------------------------
+8.8.8.8
+Organization:   Google LLC (GOGL)
+   Location
+
+   Country
+          United States (US)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          37.751 (lat) / -97.822 (long)
+
+   Time
+          2024-01-21 18:36:44 (America/Chicago)
+
+   Network
+
+   IP address
+          8.8.8.8
+
+   Hostname
+          dns.google
+
+   Provider
+          GOOGLE
+
+   ASN
+--------------------------------------------------------------------
+
+\end{verbatim}
+\end{center}
+
+
+\end{document}
