@@ -21,6 +21,7 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server.setblocking(0)
 
+#“python3 sws.py ip_address port_number
 # Bind socket to address
 server.bind(("", 9000))
 
@@ -37,29 +38,38 @@ last_activity = {}
 #HTTP/1.0 200 OK\r\nConnection: keep-alive\r\n\r\n
 def handle_request(data, socket, ip, port):
     keep_alive = 0
-    lnx = "\n"
+    lnx = "\r\n"
     wds = "\r\n"
     
-    
-    current_request = data.split('\n')
-    request_line = current_request[0]
-    header = current_request[1]
-    f_header = request_line.strip("\n")
+    re_det = r"^(.*?)\r\n(.*?)\r\n\r\n" 
+    det = re.match(re_det, data)
+    if  det:
+        current_request = data.split('\r\n')
+        request_line = current_request[0]
+        header = current_request[1]
+        con_type = header.split()[1]#.strip("\n")
+    else:
+        con_type = "close"
+        current_request = data.split('\r\n\r\n')
+        request_line = current_request[0]
+
+    #f_header = request_line.strip("\r\n")
     method, f, version = request_line.split()
     file = f.strip("/")
 
     dir = os.path.dirname(os.path.abspath(__file__))
     path = os.path.join(dir,file)
     ## 400
+
     regex_400 = r"^(GET) (\/[^\s]+) (HTTP\/1\.0)" 
-    con_type = header.split()[1]#.strip("\n")
     match = re.match(regex_400, request_line)
+
     if not match:
         code = code400
-        response = code400 + lnx + "Connection: close" +  "\n\n"
+        response = code400 + lnx + "Connection: close" +  "\r\n\r\n"
     elif not os.path.isfile(path):
         code = code404
-        response = code404 + lnx + "Connection: " + con_type + "\n\n"
+        response = code404 + lnx + "Connection: " + con_type + "\r\n\r\n"
         if con_type == "keep-alive":
             keep_alive = 1
     else:
@@ -67,8 +77,8 @@ def handle_request(data, socket, ip, port):
         with open(path, 'r') as file:
             buffer = file.read()
 
-        file_content = buffer.strip("\n")
-        response = code200 + lnx + "Connection: " + con_type + "\n\n" + file_content
+        file_content = buffer.strip("\r\n")
+        response = code200 + lnx + "Connection: " + con_type + "\r\n\r\n" + buffer
         if con_type == "keep-alive":
             keep_alive = 1
 
@@ -89,8 +99,7 @@ while inputs:
 
     update_time = datetime.now()
     for sock in list(last_activity.keys()):
-        if update_time - last_activity[sock] > timedelta(seconds=5):
-            print(update_time - last_activity[sock], sock)
+        if update_time - last_activity[sock] > timedelta(seconds=30):
             close_socket(sock)
             del last_activity[sock]
 
@@ -110,12 +119,12 @@ while inputs:
         else:
             # A readable client socket has data
             data = s.recv(1024).decode()
-            all_data = data.split("\n\n")
+            all_data = data.split("\r\n\r\n")
             all_data = [item for item in all_data if item] #remove empty entries
             for this_data in all_data:
                 if this_data:
                     last_activity[s] = datetime.now()
-                    this_data = this_data + "\n\n"
+                    this_data = this_data + "\r\n\r\n"
                     this_data.encode()
                     message_queues[s].put(this_data)
                     if s not in outputs:
@@ -147,7 +156,7 @@ while inputs:
             f_port = conn.getpeername()[1]
             msg = next_msg
             f_msg = msg
-            f_msg = f_msg.split("\n")[0]
+            f_msg = f_msg.split("\r\n")[0]
             response,code,conn_type, f_ip, f_port = handle_request(msg,s, f_ip, f_port)
             s.send(response.encode())
 
