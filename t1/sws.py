@@ -21,7 +21,6 @@ else:
     server.bind((ip_address, port_number))
     server.listen(5)
 
-response_400 = "HTTP/1.0 400 Bad Request\r\nConnection: close\r\n\r\n"
 code400 = "HTTP/1.0 400 Bad Request"
 code404 = "HTTP/1.0 404 Not Found"
 code200 = "HTTP/1.0 200 OK"
@@ -34,32 +33,31 @@ message_queues = {} # Outgoing message queues
 last_activity = {}
 
 
-
 #HTTP/1.0 200 OK\r\nConnection: keep-alive\r\n\r\n
 def handle_request(data, socket, ip, port):
     keep_alive = 0
-    lnx = "\r\n"
-    wds = "\r\n"
+    new_line = "\r\n"
 
     regex_400 = r"^(GET) (\/[^\s]+) (HTTP\/1\.0)" 
     match = re.match(regex_400, data)
 
     if not match:
         code = code400
-        response = code400 + lnx + "Connection: close" + "\r\n\r\n"
+        response = code400 + new_line + "Connection: close" + "\r\n\r\n"
         return response, code, keep_alive, ip, port
     else:
-
-        re_det = r"^(.*?)\r\n(.*?)\r\n\r\n" 
+        re_det = r"^(.*?)\r?\n(.*?)\r?\n\r?\n"
         has_header = re.match(re_det, data)
         if  has_header:
-            current_request = data.split('\r\n')
+            current_request = re.split(r"\r\n|\n", data)
+            #current_request = [item for item in current_request if item] #remove empty entries
             request_line = current_request[0]
             header = current_request[1]
             con_type = header.split()[1]
         else:
             con_type = "close"
-            current_request = data.split('\r\n\r\n')
+            current_request = re.split(r"\r\n\r\n|\n\n", data)
+            #current_request = [item for item in current_request if item] #remove empty entries
             request_line = current_request[0]
 
         _, f, _ = request_line.split()
@@ -70,14 +68,14 @@ def handle_request(data, socket, ip, port):
 
         if not os.path.isfile(path):
             code = code404
-            response = code404 + lnx + "Connection: " + con_type + "\r\n\r\n"
+            response = code404 + new_line + "Connection: " + con_type + "\r\n\r\n"
             if con_type == "keep-alive":
                 keep_alive = 1
         else:
             code = code200
             with open(path, 'r') as file:
                 buffer = file.read()
-            response = code200 + lnx + "Connection: " + con_type + "\r\n\r\n" + buffer
+            response = code200 + new_line + "Connection: " + con_type + "\r\n\r\n" + buffer
             if con_type == "keep-alive":
                 keep_alive = 1
 
@@ -117,7 +115,7 @@ while inputs:
         else:
             # A readable client socket has data
             data = s.recv(1024).decode()
-            all_data = data.split("\r\n\r\n")
+            all_data= re.split(r"\r\n\r\n|\n\n", data)
             all_data = [item for item in all_data if item] #remove empty entries
             for this_data in all_data:
                 if this_data:
@@ -143,8 +141,7 @@ while inputs:
             f_ip = conn.getpeername()[0]
             f_port = conn.getpeername()[1]
             msg = next_msg
-            f_msg = msg
-            f_msg = f_msg.split("\r\n")[0]
+            f_msg = re.split(r"\r\n|\n", next_msg)[0]
             response, code, conn_type, f_ip, f_port = handle_request(msg, s, f_ip, f_port)
             s.send(response.encode())
 
@@ -153,7 +150,5 @@ while inputs:
                 close_socket(s)
                 del last_activity[s]
 
-
     for s in exceptional:
         close_socket(s)
-

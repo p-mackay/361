@@ -20,19 +20,6 @@ outputs = []  # Sockets to which we expect to write
 message_queues = {}  # Outgoing message queues
 connection_headers = {}  # Track connection headers for persistence
 
-def handle_client_connection(client_socket):
-    data_buffer = ""
-    while True:
-        data = client_socket.recv(1024).decode()
-        if not data:
-            break  # Connection closed by client
-        data_buffer += data
-        # Check if we have at least one complete request (ending with double CRLF)
-        while "\r\n\r\n" in data_buffer:
-            request, data_buffer = data_buffer.split("\r\n\r\n", 1)
-            request += "\r\n\r\n"  # Add the separator back for processing
-            handle_connection(request, client_socket)
-        # Handle keep-alive or close the connection based on the logic here
 
 def handle_connection(client_socket, request_data):
 
