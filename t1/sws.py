@@ -121,7 +121,6 @@ while inputs:
                 if this_data:
                     last_activity[s] = datetime.now()
                     this_data = this_data + "\r\n\r\n"
-                    this_data.encode()
                     message_queues[s].put(this_data)
                     if s not in outputs:
                         outputs.append(s)
