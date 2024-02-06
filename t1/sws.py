@@ -31,6 +31,7 @@ inputs = [server]   # Sockets from which we expect to read
 outputs = []        # Sockets to which we expect to write
 message_queues = {} # Outgoing message queues
 last_activity = {}
+request_buffer = {}
 
 
 #HTTP/1.0 200 OK\r\nConnection: keep-alive\r\n\r\n
@@ -81,13 +82,19 @@ def handle_request(data, socket, ip, port):
 
         return response, code, keep_alive, ip, port
 
-# Close a socket
-def close_socket(s):
-    if s in inputs:  inputs.remove(s)
-    if s in outputs: outputs.remove(s)
-    s.close()
+def close_socket(sock):
+    if sock in inputs:
+        inputs.remove(sock)
+    if sock in outputs:
+        outputs.remove(sock)
+    sock.close()
+    if sock in message_queues:
+        del message_queues[sock]
+    if sock in last_activity:
+        del last_activity[sock]
+    if sock in request_buffer:
+        del request_buffer[sock]
 
-    del message_queues[s]
 
 
 # Main loop
@@ -97,7 +104,6 @@ while inputs:
     for sock in list(last_activity.keys()):
         if update_time - last_activity[sock] > timedelta(seconds=30):
             close_socket(sock)
-            del last_activity[sock]
 
     # Wait for at least one of the sockets to be ready for processing
     readable, writable, exceptional = select.select(inputs, outputs, inputs,1)
@@ -112,6 +118,7 @@ while inputs:
             inputs.append(conn)
             message_queues[conn] = queue.Queue()
             last_activity[conn] = datetime.now()
+            request_buffer[conn] = ''
         else:
             # A readable client socket has data
             data = s.recv(1024).decode()
@@ -127,7 +134,6 @@ while inputs:
                 else:
                     # The connection has been closed
                     close_socket(s)
-                    del last_activity[s]
 
     for s in writable:
         try:
@@ -147,7 +153,6 @@ while inputs:
             print(f"{current_time}: {f_ip}:{f_port} {f_msg}; {code} ")
             if conn_type == 0:
                 close_socket(s)
-                del last_activity[s]
 
     for s in exceptional:
         close_socket(s)
