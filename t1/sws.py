@@ -34,7 +34,6 @@ last_activity = {}
 request_buffer = {}
 
 
-#HTTP/1.0 200 OK\r\nConnection: keep-alive\r\n\r\n
 def handle_request(data, socket, ip, port):
     keep_alive = 0
     new_line = "\r\n"
@@ -51,14 +50,12 @@ def handle_request(data, socket, ip, port):
         has_header = re.match(re_det, data)
         if  has_header:
             current_request = re.split(r"\r\n|\n", data)
-            #current_request = [item for item in current_request if item] #remove empty entries
             request_line = current_request[0]
             header = current_request[1]
             con_type = header.split()[1]
         else:
             con_type = "close"
             current_request = re.split(r"\r\n\r\n|\n\n", data)
-            #current_request = [item for item in current_request if item] #remove empty entries
             request_line = current_request[0]
 
         _, f, _ = request_line.split()

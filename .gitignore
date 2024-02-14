@@ -4,3 +4,12 @@
 *.md
 *.log
 template*
+*.webm
+*.mkv
+*.html
+*.jpg
+*.jpeg
+*.png
+kurose_videos/
+tutorial_videos/
+__pycache__/
