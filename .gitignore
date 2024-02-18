@@ -10,6 +10,7 @@ template*
 *.jpg
 *.jpeg
 *.png
+*.vtt
 kurose_videos/
 tutorial_videos/
 __pycache__/

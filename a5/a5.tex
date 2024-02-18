@@ -1,0 +1,85 @@
+\documentclass{article}
+\usepackage{enumerate}
+\usepackage{titling}
+\usepackage{listings}
+\usepackage{changepage}
+\usepackage{graphicx}
+\usepackage[margin=0.75in]{geometry}
+
+\lstset{
+    basicstyle=\ttfamily,
+    breaklines=true,
+    columns=fullflexible
+}
+
+\setlength{\droptitle}{-2cm}
+\title{CSC361: Assignment 5 (a5)}
+\author{Paul MacKay}
+
+\begin{document}
+
+\maketitle
+
+\section{}
+Analyzing the .cap file in wireshark, it is evident that TCP uses a window to manage
+flow control. The TCP window fills up then there is a window update. Then the receiver can
+read more data after it is updated.
+{\small
+\begin{lstlisting}
+15:44:45.510981 IP 192.168.1.100.42314 > 10.10.1.100.commplex-link: Flags [S], seq 4108579086, win 64240, options [mss 1460,sackOK,TS val 3144028750 ecr 0,nop,wscale 7], length 0
+15:44:45.711403 IP 10.10.1.100.commplex-link > 192.168.1.100.42314: Flags [S.], seq 1374248631, ack 4108579087, win 1448, options [mss 1460,sackOK,TS val 2057841061 ecr 3144028750,nop,wscale 0], length 0
+15:44:45.711508 IP 192.168.1.100.42314 > 10.10.1.100.commplex-link: Flags [.], ack 1, win 502, options [nop,nop,TS val 3144028950 ecr 2057841061], length 0
+15:44:45.711961 IP 192.168.1.100.42314 > 10.10.1.100.commplex-link: Flags [P.], seq 1:725, ack 1, win 502, options [nop,nop,TS val 3144028951 ecr 2057841061], length 724
+15:44:45.712024 IP 192.168.1.100.42314 > 10.10.1.100.commplex-link: Flags [P.], seq 725:1449, ack 1, win 502, options [nop,nop,TS val 3144028951 ecr 2057841061], length 724
+15:44:45.812118 IP 10.10.1.100.commplex-link > 192.168.1.100.42314: Flags [.], ack 725, win 724, options [nop,nop,TS val 2057841162 ecr 3144028951], length 0
+15:44:45.812829 IP 10.10.1.100.commplex-link > 192.168.1.100.42314: Flags [.], ack 1449, win 1448, options [nop,nop,TS val 2057841163 ecr 3144028951], length 0
+15:44:45.812853 IP 192.168.1.100.42314 > 10.10.1.100.commplex-link: Flags [P.], seq 1449:2173, ack 1, win 502, options [nop,nop,TS val 3144029052 ecr 2057841163], length 724
+15:44:45.812857 IP 192.168.1.100.42314 > 10.10.1.100.commplex-link: Flags [P.], seq 2173:2897, ack 1, win 502, options [nop,nop,TS val 3144029052 ecr 2057841163], length 724
+15:44:45.913105 IP 10.10.1.100.commplex-link > 192.168.1.100.42314: Flags [.], ack 2897, win 0, options [nop,nop,TS val 2057841263 ecr 3144029052], length 0
+15:44:45.913167 IP 10.10.1.100.commplex-link > 192.168.1.100.42314: Flags [.], ack 2897, win 1448, options [nop,nop,TS val 2057841263 ecr 3144029052], length 0
+15:44:45.913177 IP 192.168.1.100.42314 > 10.10.1.100.commplex-link: Flags [P.], seq 2897:3621, ack 1, win 502, options [nop,nop,TS val 3144029152 ecr 2057841263], length 724
+15:44:45.913181 IP 192.168.1.100.42314 > 10.10.1.100.commplex-link: Flags [P.], seq 3621:4345, ack 1, win 502, options [nop,nop,TS val 3144029152 ecr 2057841263], length 724
+15:44:46.013375 IP 10.10.1.100.commplex-link > 192.168.1.100.42314: Flags [.], ack 4345, win 0, options [nop,nop,TS val 2057841363 ecr 3144029152], length 0
+15:44:46.013425 IP 10.10.1.100.commplex-link > 192.168.1.100.42314: Flags [.], ack 4345, win 1448, options [nop,nop,TS val 2057841363 ecr 3144029152], length 0
+15:44:46.013434 IP 192.168.1.100.42314 > 10.10.1.100.commplex-link: Flags [P.], seq 4345:5069, ack 1, win 502, options [nop,nop,TS val 3144029252 ecr 2057841363], length 724
+15:44:46.113673 IP 10.10.1.100.commplex-link > 192.168.1.100.42314: Flags [.], ack 5069, win 1448, options [nop,nop,TS val 2057841464 ecr 3144029252], length 0
+15:44:46.113705 IP 192.168.1.100.42314 > 10.10.1.100.commplex-link: Flags [FP.], seq 5069:5793, ack 1, win 502, options [nop,nop,TS val 3144029353 ecr 2057841464], length 724
+15:44:46.213958 IP 10.10.1.100.commplex-link > 192.168.1.100.42314: Flags [.], ack 5794, win 1448, options [nop,nop,TS val 2057841564 ecr 3144029353], length 0
+15:44:46.232036 IP 10.10.1.100.commplex-link > 192.168.1.100.42314: Flags [F.], seq 1, ack 5794, win 1448, options [nop,nop,TS val 2057841582 ecr 3144029353], length 0
+15:44:46.232060 IP 192.168.1.100.42314 > 10.10.1.100.commplex-link: Flags [.], ack 2, win 502, options [nop,nop,TS val 3144029471 ecr 2057841582], length 0
+\end{lstlisting}
+}
+
+\newpage
+\section{}
+\subsection{Connection Management}
+\begin{itemize}
+    \item
+        \textit{Establishing a connection:} Uses a two-way handshake.
+        The sender first sends a SYN packet to the receiver. Once received, the receiver sends 
+        an ACK packet to the sender to accept the connection, then a connection is made. Both of the 
+        initial SYN and ACK packet contain initial sequence number, and window size.
+        After the connection is established the sender can then start sending DAT packets to the receiver.
+    \item 
+        \textit{Closing a connection:}
+        Once the sender reads and sends all data from the file to the receiver, and has received all
+        ACK messages for each packet. The sender sends a FIN message to the receiver. Once the 
+        receiver gets this message it sends back an ACK message to the sender, and the connection is closed.
+\end{itemize}
+\subsection{Flow Control}
+\begin{itemize}
+    \item 
+        \textit{The receiver} reads data from the receive buffer, data entry is restricted with a receive window
+        to prevent a buffer overflow. This is calculated by the below equation.
+        The receive window is the amount of free room in the buffer. The value of rwnd is communicated back to
+        the sender in an ACK message.
+        \[rwnd = RcvBuffer – [LastByteRcvd – LastByteRead]\]
+    \item
+        \textit{The sender} stores unACK'ed packets in the send buffer. The sender follows the below rule 
+        so that the sender does not send too much data at a time.
+        \[LastByteSent – LastByteAcked \leq rwnd\] 
+\end{itemize}
+
+\includegraphics[width=\textwidth]{image}
+
+\end{document}

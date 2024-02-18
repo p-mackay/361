@@ -1,0 +1,145 @@
+Collected: 12 tests
+=========
+Running test: test_start_server
+Earned: 0 points out of 0.
+=========
+Running test: test_200_ok_small
+ --- Expected --- 
+b'HTTP/1.0 200 OK\r\r\n\r\r\n<h1>Lorem ipsum dolor sit amet</h1>\r\n'
+ --- Received --- 
+b''
+ ---
+ --- Server Output ---
+Traceback (most recent call last):
+  File "../p1_submissions/V00967869/sws.py", line 147, in <module>
+    response, code, conn_type, f_ip, f_port = handle_request(msg, s, f_ip, f_port)
+  File "../p1_submissions/V00967869/sws.py", line 55, in handle_request
+    con_type = header.split()[1]
+IndexError: list index out of range
+
+ ---
+Server has died. No points awarded. Restarting...
+Earned: 0 points out of 1.
+=========
+Running test: test_200_ok_large
+ --- Expected --- 
+b'HTTP/1.0 200 OK\r\r\n\r\r\n<!doctype html>\r\n<html lang="en">\r\n<head>\r\n<meta charset="utf-8">\r\n<title>US Patent 465588A - Toilet Paper Roll</title>\r\n</head>\r\n<body>\r\n<p>\r\nTo at whom it may concern:\r\n</p><p>\r\nBe it known that I, SETH WHEELER, of the city and county of Albany, and\r\nState of New York, have invented certain new and useful Improvements in\r\nToilet-Paper Rolls; and I do hereby declare that the following is a full,\r\nclear, and exact description thereof, reference being had to the\r\naccompanying drawings, forming a part of this specification.\r\n</p><p>\r\nMy invention consists of a roll of connected sheets of paper for toilet\r\nuse, said roll having incisions at intervals extending from the side of\r\nthe web toward the center, but not meeting, and terminating in an angular\r\nout, whereby the slight connection left may be separated without injury to\r\nthe connected sheets. A difficulty with rolls of this character as\r\nheretofore manufactured has been due to the width of the bond uniting the\r\nsheets, which it has been necessary to make of considerable strength to\r\nwithstand the tension of winding, but which it is desirable should be as\r\nfrail as may be when the roll is unwound, otherwise the sheets do not\r\nseparate with certainty and many of them are torn. Attempts have been made\r\nto remedy this by incisions in the bond that should not weaken it\r\nlongitudinally; but such incisions avail little unless the sheets are\r\npulled in a certain direction--a condition the user seldom considers or is\r\naware of. In my improved roll I overcome this wholly by reducing the bond\r\nand terminating the lateral incisions in an angular cut, removing all\r\nliability of injury to the sheets in separating them. With this\r\nconstruction one sheet may be separated from the next without liability of\r\nthe incisions turning in a direction parallel with the web and tearing off\r\na considerable part of the contiguous sheet. At the same time I wind rolls\r\ncontaining any desired number of sheets.\r\n</p><p>\r\nIn the drawings, Figure 1 is a view of my roll of paper having arched and\r\nserrated incisions with a sheet hanging therefrom. Fig. 2 represents a\r\ndetached sheet of paper.\r\n</p><p>\r\nThe roll <i>a</i> is composed of many sheets like <i>b</i>, Fig. 2, of\r\nsoft paper suitable for toilet use. These sheets are produced by arched\r\nserrated. incisions, as shown at <i>c c\' c\'\' c\'\'\'</i> in Fig. 1,\r\nwhich extend from the edge of each sheet almost to the center, where the\r\nincisions terminate in an angular cut in the direction of the roll and the\r\ncenter line of the series of sheets,\r\nleaving a slight connection <i>d</i>, which serves to hold the sheets\r\ntogether. The purpose of this angular cut is to give the final tear, when\r\nthe sheet is separated, a direction toward the center line of the series\r\nof sheets and prevent it taking a course parallel with it. The incisions\r\nare made sufficiently far apart to give a suitable sheet of paper for use.\r\nshown in Fig. 2.\r\n</p><p>\r\nThe connection <i>d</i>, as shown in Fig. 1, permits of the easy severance\r\nof a sheet of paper from a roll, which will be intact and no litter is\r\noccasioned by such severance. The curved mode of dividing the sheets\r\npermits the end of a sheet to be found more readily, and the serrations\r\naid materially in grasping the end of a sheet when not hanging from a\r\nroll; but I do not confine myself to this construction, as it is obvious\r\nthat an angular termination may be given to incisions that are neither\r\ncurved nor serrated.\r\n</p><p>\r\nI claim--\r\n</p><p>\r\nA roll of paper partially divided into sheets by lateral incisions\r\nextending from the sides of the web toward the center of the sheets, each\r\nsheet being connected to the next one by a /\\-shaped tongue, substantially\r\nas described.\r\n</p><p>\r\nSETH WHEELER.\r\n</p><p>\r\nWitnesses:<br>E. J. WHEELER,<br>WM. A. WHEELER.\r\n</p>\r\n<!--\r\n01 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n02 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n03 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n04 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n05 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n06 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n07 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n08 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n09 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n10 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n\r\n11 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n12 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n13 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n14 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n15 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n16 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n17 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n18 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n19 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n20 The quick brown fox jumps over the lazy dog. ===== ===== ===== ===== =====\r\n-->\r\n</body>\r\n</html>\r\n'
+ --- Received --- 
+b''
+ ---
+ --- Server Output ---
+Traceback (most recent call last):
+  File "../p1_submissions/V00967869/sws.py", line 147, in <module>
+    response, code, conn_type, f_ip, f_port = handle_request(msg, s, f_ip, f_port)
+  File "../p1_submissions/V00967869/sws.py", line 55, in handle_request
+    con_type = header.split()[1]
+IndexError: list index out of range
+
+ ---
+Server has died. No points awarded. Restarting...
+Earned: 0 points out of 1.
+=========
+Running test: test_404_not_found
+ --- Expected --- 
+b'HTTP/1.0 404 Not Found\r\r\nConnection: close\r\r\n\r\r\n'
+ --- Received --- 
+b''
+ ---
+ --- Server Output ---
+Traceback (most recent call last):
+  File "../p1_submissions/V00967869/sws.py", line 147, in <module>
+    response, code, conn_type, f_ip, f_port = handle_request(msg, s, f_ip, f_port)
+  File "../p1_submissions/V00967869/sws.py", line 55, in handle_request
+    con_type = header.split()[1]
+IndexError: list index out of range
+
+ ---
+Server has died. No points awarded. Restarting...
+Earned: 0 points out of 1.
+=========
+Running test: test_400_bad_request
+Exited immediately.
+Earned: 2 points out of 2.
+=========
+Running test: test_header_fields
+ --- Expected --- 
+b'HTTP/1.0 404 Not Found\r\r\nConnection: keep-alive\r\r\n\r\r\nHTTP/1.0 404 Not Found\r\r\nConnection: close\r\r\n\r\r\n'
+ --- Received --- 
+b'HTTP/1.0 404 Not Found\r\r\nConnection: keep-alive\r\r\n\r\r\nHTTP/1.0 400 Bad Request\r\r\nConnection: close\r\r\n\r\r\n'
+ ---
+Earned: 0.0 points out of 1.
+=========
+Running test: test_concurrent_connections
+select detected.
+ --- Expected --- 
+b'HTTP/1.0 404 Not Found\r\r\nConnection: keep-alive\r\r\n\r\r\nHTTP/1.0 404 Not Found\r\r\nConnection: close\r\r\n\r\r\n'
+ --- Received --- 
+b'HTTP/1.0 404 Not Found\r\r\nConnection: keep-alive\r\r\n\r\r\nHTTP/1.0 400 Bad Request\r\r\nConnection: close\r\r\n\r\r\n'
+ ---
+Earned: 1.0 points out of 1.
+=========
+Running test: test_back_to_back_requests
+ --- Expected --- 
+b'HTTP/1.0 404 Not Found\r\r\nConnection: keep-alive\r\r\n\r\r\nHTTP/1.0 200 OK\r\r\nConnection: keep-alive\r\r\n\r\r\n<h1>Lorem ipsum dolor sit amet</h1>\r\nHTTP/1.0 400 Bad Request\r\r\nConnection: close\r\r\n\r\r\n'
+ --- Received --- 
+b'HTTP/1.0 404 Not Found\r\r\nConnection: keep-alive\r\r\n\r\r\nHTTP/1.0 404 Not Found\r\r\nConnection: keep-alive\r\r\n\r\r\nHTTP/1.0 400 Bad Request\r\r\nConnection: close\r\r\n\r\r\n'
+ ---
+Earned: 0.0 points out of 1.
+=========
+Running test: test_timeout
+ --- Expected --- 
+b'HTTP/1.0 404 Not Found\r\r\nConnection: keep-alive\r\r\n\r\r\n'
+ --- Received --- 
+b'HTTP/1.0 404 Not Found\r\r\nConnection: keep-alive\r\r\n\r\r\nHTTP/1.0 400 Bad Request\r\r\nConnection: close\r\r\n\r\r\n'
+ ---
+Earned: 0.0 points out of 1.
+=========
+Running test: test_supports_crlf
+ --- Expected --- 
+b'HTTP/1.0 200 OK\r\r\n\r\r\n<h1>Lorem ipsum dolor sit amet</h1>\r\n'
+ --- Received --- 
+b'HTTP/1.0 404 Not Found\r\r\nConnection: close\r\r\n\r\r\n'
+ ---
+Passed.
+=========
+Running test: test_parsing
+ --- Expected --- 
+b'HTTP/1.0 404 Not Found\r\r\nConnection: keep-alive\r\r\n\r\r\nHTTP/1.0 404 Not Found\r\r\nConnection: close\r\r\n\r\r\n'
+ --- Received --- 
+b''
+ ---
+ --- Server Output ---
+Thu Feb 15 17:25:50 PST 2024: 192.168.1.100:49910 get /notfound HTTP/1.0; HTTP/1.0 400 Bad Request 
+Thu Feb 15 17:25:52 PST 2024: 192.168.1.100:49920 GET /notfound HTTP/1.0; HTTP/1.0 404 Not Found 
+Thu Feb 15 17:25:52 PST 2024: 192.168.1.100:49920 ; HTTP/1.0 400 Bad Request 
+Thu Feb 15 17:26:25 PST 2024: 10.10.1.1:49024 GET /notfound HTTP/1.0; HTTP/1.0 404 Not Found 
+Thu Feb 15 17:26:26 PST 2024: 10.10.1.1:49024 ; HTTP/1.0 400 Bad Request 
+Thu Feb 15 17:26:26 PST 2024: 10.10.1.1:49024 GET /notfound HTTP/1.0; HTTP/1.0 404 Not Found 
+Thu Feb 15 17:26:26 PST 2024: 10.10.1.1:49024 ; HTTP/1.0 400 Bad Request 
+Thu Feb 15 17:26:31 PST 2024: 192.168.1.100:49992 GET /notfound HTTP/1.0; HTTP/1.0 404 Not Found 
+Thu Feb 15 17:26:31 PST 2024: 192.168.1.100:49992 GET /small.html HTTP/1.0; HTTP/1.0 404 Not Found 
+Thu Feb 15 17:26:31 PST 2024: 192.168.1.100:49992 get /notfound HTTP/1.0; HTTP/1.0 400 Bad Request 
+Thu Feb 15 17:26:47 PST 2024: 192.168.1.100:46810 GET /notfound HTTP/1.0; HTTP/1.0 404 Not Found 
+Thu Feb 15 17:26:48 PST 2024: 192.168.1.100:46810 ; HTTP/1.0 400 Bad Request 
+Thu Feb 15 17:27:52 PST 2024: 192.168.1.100:37192 GET /small.html HTTP/1.0; HTTP/1.0 404 Not Found 
+Traceback (most recent call last):
+  File "../p1_submissions/V00967869/sws.py", line 147, in <module>
+    response, code, conn_type, f_ip, f_port = handle_request(msg, s, f_ip, f_port)
+  File "../p1_submissions/V00967869/sws.py", line 55, in handle_request
+    con_type = header.split()[1]
+IndexError: list index out of range
+
+ ---
+Server has died. No points awarded. Restarting...
+Lost: 0.5 points.
+=========
+Running test: test_log_format
+There should be 17 lines. There are 0. May vary if some tests failed.
+ --- Expected --- 
+time: client_ip:client_port request; response
+ --- Received --- 
+
+ ---
+Earned: 0.0 points out of 1.
+=========
+Score: 2.5 / 10
