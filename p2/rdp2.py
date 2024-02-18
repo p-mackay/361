@@ -44,7 +44,6 @@ class RDPSender:
 
     def send_data(self, data):
         if self.state == OPEN:
-
             data_message = f"DAT\n\n{data}\n\n".encode()
             snd_buf.append(data_message)
             self.last_send_time = time.time()

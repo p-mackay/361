@@ -42,6 +42,9 @@ udp_sock.bind((ip, port))
 
 snd_messages = {}
 rcv_messages = {}
+snd_buf = []
+rcv_buf = []
+
 
 CLOSED = "closed"
 SYN_SENT = "syn_sent"
@@ -50,11 +53,11 @@ FIN_SENT = "fin_sent"
 
 
 # Design Ideas (Driver) Cont’d
-class rdp_receiver:
+class Rdp_receiver:
     pass
 
 # Design Ideas (Sender)
-class rdp_sender:
+class Rdp_sender:
     def __init__(self):
         self.state = CLOSED
         self.snd_buf = []
@@ -76,7 +79,7 @@ class rdp_sender:
                 self.state = OPEN
             else:
                 print("con failed")
-
+    '''
         if self.state == OPEN:
             if three duplicate received:
                 # rewrite the rdp packets into snd_buf
@@ -87,28 +90,40 @@ class rdp_sender:
         if self.state == fin_sent:
             if ack# is correct:
         self.state = close
+    '''
+
+    def getstate(self):
+        return self.state
 
     def send(self):
         if self.state == OPEN:
+            pass
 
     def close(self):
         # write FIN packet to snd_buf
         self.state = FIN_SENT
+        pass
 
+    '''
     def check_timeout(self):
-        if self.state != close and timeout has occured:
+        if self.state != close and timeout has occurred:
+    '''
             # rewrite the rdp packets into snd_buf
 # Design Ideas (Sender)
 
-while (rdp_sender.getstate() != close) or (rdp_receiver.getstate() != close):
+rdp_sender = Rdp_sender()
+rdp_receiver = Rdp_receiver()
+
+while (rdp_sender.getstate() != CLOSED) or (rdp_receiver.getstate()) != CLOSED:
 
     readable, writable, exceptional = select.select([udp_sock],
                                                           [udp_sock],
                                                           [udp_sock],
-                                                          timeout)
+                                                          1)
     if udp_sock in readable:
         # receive data and append it into rcv_buf
-        if the message in rcv_buf is complete (detect a new line):
+        #if the message in rcv_buf is complete (detect a new line):
+            if rcv_buf[].decode().endswith("\n\n"):
             # extract the message from rcv_buf
             # split the message into RDP packets
             for each packet:
@@ -122,5 +137,4 @@ while (rdp_sender.getstate() != close) or (rdp_receiver.getstate() != close):
         bytes_sent = udp_sock.sendto(snd_buf, ECHO_SRV)
             # remove the bytes already sent from snd_buf
         rdp_sender.check_timeout()
-
 
