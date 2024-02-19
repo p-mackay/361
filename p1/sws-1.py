@@ -131,17 +131,18 @@ while inputs:
             inputs.append(conn)
             response_message[conn] = queue.Queue()
             last_activity[conn] = datetime.now()
-            request_buffer[conn] = ''
+            request_message[conn] = ''  # Initialize the request buffer for the new connection
         else:
-            # A readable client socket has message
+            # A readable client socket has a message
             message = s.recv(1024).decode()
             if message:
-                request_message[s] += message
-                if message.endswith("\r\n\r\n") or  message.endswith("\n\n"):
+                request_message[s] += message  # Append the message to the buffer
+                if message.endswith("\r\n\r\n") or message.endswith("\n\n"):
                     whole_message = request_message[s]
                     outputs.append(s)
                     connection.handle_request(whole_message)
-                    response_message[s].push(connection.get_response())
+                    response_message[s].put(connection.get_response())  # Use put() method for queue
+                    request_message[s] = ''  # Clear the buffer after processing
             else:
                 close_socket(s)
 
