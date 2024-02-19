@@ -26,11 +26,10 @@ outputs = []
 response_message = {}
 last_activity = {}
 request_message = {}
-
+keep_alive = {}
 
 class HTTP_handler:
     def __init__(self):
-        self.keep_alive = False
         self.response = None
         self.code = None
         self.con_type = "close"
@@ -38,35 +37,29 @@ class HTTP_handler:
     def handle_request(self, message):
         new_line = "\r\n"
         request_lines = message.splitlines()
-        
-        # Ensure that the request has at least one line (the request line)
+
         if len(request_lines) < 1:
             return
 
         request_line = request_lines[0]
         headers = request_lines[1:]
 
-        # Parse the request line
         parts = request_line.split()
         if len(parts) != 3:
             self.response = code400 + new_line + "Connection: close" + new_line * 2
             return
 
-        method, path, version = parts
-        if method != "GET":
+        command, path, version = parts
+        if command != "GET" or not path.startswith("/") or version != "HTTP/1.0":
             self.response = code400 + new_line + "Connection: close" + new_line * 2
             return
 
-        self.con_type = "close"  # Default to close
-        self.keep_alive = False  # Default to not keeping the connection alive
+        self.con_type = "close"
         for header in headers:
             if header.lower().startswith("connection:"):
                 self.con_type = header.split(":")[1].strip().lower()
-                if self.con_type == "keep-alive":
-                    self.keep_alive = True  # Set the keep_alive flag
                 break
 
-        # Find the requested file
         file_path = path.strip("/")
         if not os.path.isfile(file_path):
             self.response = code404 + new_line + "Connection: " + self.con_type + new_line * 2
@@ -81,40 +74,38 @@ def close_socket(sock):
         outputs.remove(sock)
     sock.close()
 
-connection = HTTP_handler()
-
 while inputs:
     readable, writable, exceptional = select.select(inputs, outputs, inputs, 1)
-
-    current_time = datetime.now()
-    for sock in list(last_activity.keys()):
-        if current_time - last_activity[sock] > timedelta(seconds=30):
-            close_socket(sock)
-            break
 
     for s in readable:
         if s is server:
             conn, addr = s.accept()
-            print(conn, addr)
             conn.setblocking(0)
             inputs.append(conn)
             response_message[conn] = queue.Queue()
             last_activity[conn] = datetime.now()
             request_message[conn] = ''
+            keep_alive[conn] = True
         else:
             message = s.recv(1024).decode()
             if message:
                 request_message[s] += message
                 last_activity[s] = datetime.now()
-                while "\r\n\r\n" in request_message[s] or "\n\n" in request_message[s]:
-                    # Split the request message at the first occurrence of the double new line
-                    whole_message, request_message[s] = request_message[s].split("\r\n\r\n", 1) if "\r\n\r\n" in request_message[s] else request_message[s].split("\n\n", 1)
-                    outputs.append(s)
-                    connection.handle_request(whole_message)
-                    response_message[s].put(connection.response)
+                if "\r\n\r\n" in request_message[s] or "\n\n" in request_message[s]:
+                    while "\r\n\r\n" in request_message[s] or "\n\n" in request_message[s]:
+                        delimiter = "\r\n\r\n" if "\r\n\r\n" in request_message[s] else "\n\n"
+                        end_index = request_message[s].find(delimiter) + len(delimiter)
+                        whole_message = request_message[s][:end_index]
+                        request_message[s] = request_message[s][end_index:]
+                        connection = HTTP_handler()
+                        connection.handle_request(whole_message)
+                        response_message[s].put(connection.response)
+                        keep_alive[s] = connection.con_type == "keep-alive"
+                    if s not in outputs:
+                        outputs.append(s)
             else:
-                # Close the connection if it's not keep-alive
-                if not connection.keep_alive:
+                # Close the socket if there's no message and it's not a keep-alive connection
+                if not keep_alive[s]:
                     close_socket(s)
 
     for s in writable:
@@ -122,12 +113,15 @@ while inputs:
             next_msg = response_message[s].get_nowait()
         except queue.Empty:
             outputs.remove(s)
+            close_socket(s)
         else:
             s.send(next_msg.encode())
-            last_activity[s] = datetime.now()  # Update last activity time
-            if connection.con_type == "close":
-                close_socket(s)
+            last_activity[s] = datetime.now()
 
     for s in exceptional:
         close_socket(s)
 
+    current_time = datetime.now()
+    for sock in list(last_activity.keys()):
+        if current_time - last_activity[sock] > timedelta(seconds=30):
+            close_socket(sock)
