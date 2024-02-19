@@ -55,12 +55,14 @@ class RDPSender:
             self.state = FIN_SENT
             self.last_send_time = time.time()
 
+    '''
     def check_timeout(self):
         if self.state != CLOSED and time.time() - self.last_send_time > TIMEOUT:
             # Resend all packets in snd_buf
             for packet in snd_buf:
                 udp_sock.sendto(packet, (ip, port))
             self.last_send_time = time.time()
+    '''
 
     def get_state(self):
         return self.state
@@ -71,6 +73,7 @@ class RDPReceiver:
         self.state = CLOSED
 
     def rcv_data(self, data):
+
         if self.state == OPEN:
             if data.seq < rcv_exp:
                 drop packet
