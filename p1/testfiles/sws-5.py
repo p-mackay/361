@@ -49,8 +49,8 @@ class HTTP_handler:
             self.response = code400 + new_line + "Connection: close" + new_line * 2
             return
 
-        method, path, version = parts
-        if method != "GET":
+        command, path, version = parts
+        if command != "GET" or not path.startswith("/") or version != "HTTP/1.0":
             self.response = code400 + new_line + "Connection: close" + new_line * 2
             return
 
@@ -69,15 +69,17 @@ class HTTP_handler:
             self.response = code200 + new_line + "Connection: " + self.con_type + new_line * 2 + content
 
 def close_socket(sock):
-    inputs.remove(sock)
+    if sock in inputs:
+        inputs.remove(sock)
+        sock.close()
     if sock in outputs:
         outputs.remove(sock)
     sock.close()
 
-connection = HTTP_handler()
 while inputs:
     readable, writable, exceptional = select.select(inputs, outputs, inputs, 1)
 
+    current_time = datetime.now()
     for s in readable:
         if s is server:
             conn, addr = s.accept()
@@ -86,43 +88,42 @@ while inputs:
             response_message[conn] = queue.Queue()
             last_activity[conn] = datetime.now()
             request_message[conn] = ''
-            keep_alive[conn] = True  # Assume keep-alive until a request specifies otherwise
+            keep_alive[conn] = True
         else:
             message = s.recv(1024).decode()
             if message:
                 request_message[s] += message
                 last_activity[s] = datetime.now()
-                while "\r\n\r\n" in request_message[s] or "\n\n" in request_message[s]:
-                    delimiter = "\r\n\r\n" if "\r\n\r\n" in request_message[s] else "\n\n"
-                    end_index = request_message[s].find(delimiter) + len(delimiter)
-                    whole_message = request_message[s][:end_index]
-                    request_message[s] = request_message[s][end_index:]
-                    connection.handle_request(whole_message)
-                    response_message[s].put(connection.response)
-                    keep_alive[s] = connection.con_type == "keep-alive"
+                if "\r\n\r\n" in request_message[s] or "\n\n" in request_message[s]:
+                    while "\r\n\r\n" in request_message[s] or "\n\n" in request_message[s]:
+                        delimiter = "\r\n\r\n" if "\r\n\r\n" in request_message[s] else "\n\n"
+                        end_index = request_message[s].find(delimiter) + len(delimiter)
+                        whole_message = request_message[s][:end_index]
+                        request_message[s] = request_message[s][end_index:]
+                        connection = HTTP_handler()
+                        connection.handle_request(whole_message)
+                        response_message[s].put(connection.response)
+                        keep_alive[s] = connection.con_type == "keep-alive"
+                        print(connection.con_type)
                     if s not in outputs:
                         outputs.append(s)
-            else:
-                # Close the socket if there's no message and it's not a keep-alive connection
-                if not keep_alive[s]:
-                    close_socket(s)
+                else:
+                    # Close the socket if there's no message and it's not a keep-alive connection
+                    if not keep_alive[s]:
+                        close_socket(s)
 
     for s in writable:
         try:
             next_msg = response_message[s].get_nowait()
         except queue.Empty:
             outputs.remove(s)
+
+            for sock in list(last_activity.keys()):
+                if current_time - last_activity[sock] > timedelta(seconds=30) or not keep_alive[s]:
+                    close_socket(sock)
         else:
             s.send(next_msg.encode())
             last_activity[s] = datetime.now()
-            # Close the socket immediately if the connection type is "close"
-            if not keep_alive[s]:
-                close_socket(s)
 
     for s in exceptional:
         close_socket(s)
-
-    current_time = datetime.now()
-    for sock in list(last_activity.keys()):
-        if current_time - last_activity[sock] > timedelta(seconds=30):
-            close_socket(sock)

@@ -35,6 +35,7 @@ class HTTP_handler:
         self.con_type = "close"
 
     def handle_request(self, message):
+        has_header = False
         new_line = "\r\n"
         request_lines = message.splitlines()
 
@@ -47,18 +48,19 @@ class HTTP_handler:
         parts = request_line.split()
         if len(parts) != 3:
             self.response = code400 + new_line + "Connection: close" + new_line * 2
-            return
+            return 
 
         command, path, version = parts
         if command != "GET" or not path.startswith("/") or version != "HTTP/1.0":
             self.response = code400 + new_line + "Connection: close" + new_line * 2
             return
 
-        self.con_type = "close"
         for header in headers:
             if header.lower().startswith("connection:"):
                 self.con_type = header.split(":")[1].strip().lower()
                 break
+            else:
+                self.con_type = "close"
 
         file_path = path.strip("/")
         if not os.path.isfile(file_path):
@@ -68,12 +70,21 @@ class HTTP_handler:
                 content = file.read()
             self.response = code200 + new_line + "Connection: " + self.con_type + new_line * 2 + content
 
+    def get_con_type(self):
+        return self.con_type
+
+    def set_con_type(self, type):
+        self.con_type = type
+
+
 def close_socket(sock):
-    inputs.remove(sock)
+    if sock in inputs:
+        inputs.remove(sock)
     if sock in outputs:
         outputs.remove(sock)
     sock.close()
 
+connection = HTTP_handler()
 while inputs:
     readable, writable, exceptional = select.select(inputs, outputs, inputs, 1)
 
@@ -92,16 +103,14 @@ while inputs:
             if message:
                 request_message[s] += message
                 last_activity[s] = datetime.now()
-                if "\r\n\r\n" in request_message[s] or "\n\n" in request_message[s]:
-                    while "\r\n\r\n" in request_message[s] or "\n\n" in request_message[s]:
-                        delimiter = "\r\n\r\n" if "\r\n\r\n" in request_message[s] else "\n\n"
-                        end_index = request_message[s].find(delimiter) + len(delimiter)
-                        whole_message = request_message[s][:end_index]
-                        request_message[s] = request_message[s][end_index:]
-                        connection = HTTP_handler()
-                        connection.handle_request(whole_message)
-                        response_message[s].put(connection.response)
-                        keep_alive[s] = connection.con_type == "keep-alive"
+                while "\r\n\r\n" in request_message[s] or "\n\n" in request_message[s]:
+                    delimiter = "\r\n\r\n" if "\r\n\r\n" in request_message[s] else "\n\n"
+                    end_index = request_message[s].find(delimiter) + len(delimiter)
+                    whole_message = request_message[s][:end_index]
+                    request_message[s] = request_message[s][end_index:]
+                    connection.handle_request(whole_message)
+                    response_message[s].put(connection.response)
+                    keep_alive[s] = connection.con_type == "keep-alive"
                     if s not in outputs:
                         outputs.append(s)
             else:
@@ -114,17 +123,18 @@ while inputs:
             next_msg = response_message[s].get_nowait()
         except queue.Empty:
             outputs.remove(s)
+            if connection.con_type == "close":
+                close_socket(s)
 
-            for sock in list(last_activity.keys()):
-                if current_time - last_activity[sock] > timedelta(seconds=30) or not keep_alive[s]:
-                    close_socket(sock)
         else:
             s.send(next_msg.encode())
-            last_activity[s] = datetime.now()
+
 
     for s in exceptional:
         close_socket(s)
 
     for sock in list(last_activity.keys()):
-        if current_time - last_activity[sock] > timedelta(seconds=30):
+        if current_time - last_activity[sock] > timedelta(seconds=10):
             close_socket(sock)
+            del last_activity[sock]
+
