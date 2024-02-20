@@ -33,55 +33,42 @@ class HTTP_handler:
         self.response = None
         self.code = None
         self.con_type = "close"
-        self.valid = True
+        self.valid = True  # Added to track if the request is valid
 
     def handle_request(self, message):
         new_line = "\r\n"
         request_lines = message.splitlines()
 
         if len(request_lines) < 1:
-            return
+            self.valid = False  # Mark request as invalid
+            return code400 + new_line + "Connection: close" + new_line * 2
 
         request_line = request_lines[0]
         headers = request_lines[1:]
 
         parts = request_line.split()
         if len(parts) != 3:
-            self.response = code400 + new_line + "Connection: close" + new_line * 2
-            self.con_type = "close"
-            return self.response
+            self.valid = False  # Mark request as invalid
+            return code400 + new_line + "Connection: close" + new_line * 2
 
         command, path, version = parts
         if command != "GET" or not path.startswith("/") or version != "HTTP/1.0":
-            self.response = code400 + new_line + "Connection: close" + new_line * 2
-            headers[0] = "Connection: close"
-            self.con_type = "close"
-            return self.response
+            self.valid = False  # Mark request as invalid
+            return code400 + new_line + "Connection: close" + new_line * 2
 
+        self.con_type = "close"
         for header in headers:
             if header.lower().startswith("connection:"):
                 self.con_type = header.split(":")[1].strip().lower()
                 break
-            else:
-                self.con_type = "close"
-                break
 
         file_path = path.strip("/")
         if not os.path.isfile(file_path):
-            self.response = code404 + new_line + "Connection: " + self.con_type + new_line * 2
-            return self.response
+            return code404 + new_line + "Connection: " + self.con_type + new_line * 2
         else:
             with open(file_path, 'r') as file:
                 content = file.read()
-            self.response = code200 + new_line + "Connection: " + self.con_type + new_line * 2 + content
-            return self.response
-
-    def get_con_type(self):
-        return self.con_type
-
-    def set_con_type(self, type):
-        self.con_type = type
-
+            return code200 + new_line + "Connection: " + self.con_type + new_line * 2 + content
 
 def close_socket(sock):
     if sock in inputs:
@@ -90,11 +77,10 @@ def close_socket(sock):
         outputs.remove(sock)
     sock.close()
 
-connection = HTTP_handler()
+handler = HTTP_handler()
 while inputs:
     readable, writable, exceptional = select.select(inputs, outputs, inputs, 1)
 
-    current_time = datetime.now()
     for s in readable:
         if s is server:
             conn, addr = s.accept()
@@ -106,6 +92,7 @@ while inputs:
             keep_alive[conn] = True
         else:
             message = s.recv(1024).decode()
+            print("hello")
             if message:
                 request_message[s] += message
                 last_activity[s] = datetime.now()
@@ -114,19 +101,19 @@ while inputs:
                     end_index = request_message[s].find(delimiter) + len(delimiter)
                     whole_message = request_message[s][:end_index]
                     request_message[s] = request_message[s][end_index:]
-                    msg = connection.handle_request(whole_message)
-                    keep_alive[s] = connection.get_con_type() == "keep-alive"
-                    print(keep_alive)
-                    print(keep_alive)
-                    print(connection.get_con_type())
-                    if s not in outputs:
-                        outputs.append(s)
-
+                    msg = handler.handle_request(whole_message)
+                    keep_alive[s] = handler.con_type == "keep-alive" and handler.valid  # Only keep alive if valid and keep-alive
                     if keep_alive[s]:
                         response_message[s].put(msg)
                     else:
                         response_message[s].put(msg)
                         break
+
+                    if s not in outputs:
+                        outputs.append(s)
+            else:
+                if not keep_alive[s]:
+                    close_socket(s)
 
     for s in writable:
         try:
@@ -135,17 +122,14 @@ while inputs:
             outputs.remove(s)
             if not keep_alive[s]:
                 close_socket(s)
-                break
-
         else:
             s.send(next_msg.encode())
-
+            print("world")
 
     for s in exceptional:
         close_socket(s)
 
+    current_time = datetime.now()
     for sock in list(last_activity.keys()):
         if current_time - last_activity[sock] > timedelta(seconds=30):
             close_socket(sock)
-            del last_activity[sock]
-
