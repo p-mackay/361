@@ -77,6 +77,7 @@ def close_socket(sock):
 while inputs:
     readable, writable, exceptional = select.select(inputs, outputs, inputs, 1)
 
+    current_time = datetime.now()
     for s in readable:
         if s is server:
             conn, addr = s.accept()
@@ -113,7 +114,10 @@ while inputs:
             next_msg = response_message[s].get_nowait()
         except queue.Empty:
             outputs.remove(s)
-            close_socket(s)
+
+            for sock in list(last_activity.keys()):
+                if current_time - last_activity[sock] > timedelta(seconds=30) or not keep_alive[s]:
+                    close_socket(sock)
         else:
             s.send(next_msg.encode())
             last_activity[s] = datetime.now()
@@ -121,7 +125,6 @@ while inputs:
     for s in exceptional:
         close_socket(s)
 
-    current_time = datetime.now()
     for sock in list(last_activity.keys()):
         if current_time - last_activity[sock] > timedelta(seconds=30):
             close_socket(sock)
