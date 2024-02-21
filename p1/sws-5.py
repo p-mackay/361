@@ -1,9 +1,11 @@
+#!/usr/bin/env python3
 import socket
 import select
 import queue
 import os
 import re
 from datetime import datetime, timedelta
+from time import gmtime, strftime
 import sys
 
 if len(sys.argv) != 3:
@@ -34,6 +36,7 @@ class HTTP_handler:
         self.code = None
         self.con_type = "close"
         self.valid = True
+        self.req = None
 
     def handle_request(self, message):
         new_line = "\r\n"
@@ -43,12 +46,14 @@ class HTTP_handler:
             return
 
         request_line = request_lines[0]
+        self.req = request_line
         headers = request_lines[1:]
 
         parts = request_line.split()
         if len(parts) != 3:
             self.response = code400 + new_line + "Connection: close" + new_line * 2
             self.con_type = "close"
+            self.code = code400
             return self.response
 
         command, path, version = parts
@@ -56,6 +61,7 @@ class HTTP_handler:
             self.response = code400 + new_line + "Connection: close" + new_line * 2
             headers[0] = "Connection: close"
             self.con_type = "close"
+            self.code = code400
             return self.response
 
         for header in headers:
@@ -69,11 +75,13 @@ class HTTP_handler:
         file_path = path.strip("/")
         if not os.path.isfile(file_path):
             self.response = code404 + new_line + "Connection: " + self.con_type + new_line * 2
+            self.code = code404
             return self.response
         else:
             with open(file_path, 'r') as file:
                 content = file.read()
             self.response = code200 + new_line + "Connection: " + self.con_type + new_line * 2 + content
+            self.code = code200
             return self.response
 
     def get_con_type(self):
@@ -116,11 +124,20 @@ while inputs:
                     request_message[s] = request_message[s][end_index:]
                     msg = connection.handle_request(whole_message)
                     keep_alive[s] = connection.get_con_type() == "keep-alive"
-                    print(keep_alive)
-                    print(keep_alive)
-                    print(connection.get_con_type())
                     if s not in outputs:
                         outputs.append(s)
+
+                    '''
+                    msg = next_msg
+                    f_msg = re.split(r"\r\n|\n", next_msg)[0]
+                    response, code, conn_type, f_ip, f_port = handle_request(msg, s, f_ip, f_port)
+                    s.send(response.encode())
+                    print(f"{current_time}: {f_ip}:{f_port} {f_msg}; {code} ")
+                    '''
+                    tm = strftime("%a %b %d %H:%M:%S %Z %Y")
+                    f_ip = s.getpeername()[0]
+                    f_port = s.getpeername()[1]
+                    print(f"{tm}: {f_ip}:{f_port} {connection.req}; {connection.code} ")
 
                     if keep_alive[s]:
                         response_message[s].put(msg)
@@ -131,6 +148,7 @@ while inputs:
     for s in writable:
         try:
             next_msg = response_message[s].get_nowait()
+            
         except queue.Empty:
             outputs.remove(s)
             if not keep_alive[s]:
