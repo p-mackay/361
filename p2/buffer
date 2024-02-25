@@ -1,0 +1,42 @@
+Application layer: 
+    read file. enque file chunks into a queue (1024 byts per chunk). send data to sender.
+Transport:
+    Sender:
+        establish a connection with receiver(send SYN). wait for ACK.
+        ------------
+        ACK contains:
+        seq #: 0
+        ack #: 0
+        window: 2048
+        ------------
+        receive file data (from app layer). packetize into RDP packets. enque the packets.
+        send 
+        update variables:
+            
+
+t6: "You may send or receive a big packet that consists of several small ACK/DAT packets"
+since the max PAYLOAD is 1024bytes the only time I see this being possible is in the last bytes
+to be read from a file. 
+
+receive buffer and window: 
+Is there a recommended size for the receive buffer and window? In the text book and the lecture notes
+the window is depicted as being able to store 5 packets. t5 page 13 shows that the initial window size 
+is 2048 only allowing for 2 packets. Wouldn't it be beneficial to make the window at 
+least 4096, 
+
+Given that the max payload is 1024
+
+
+        
+receive buffer and window: 
+The text book and notes show the recv window being able to store 5 packets. 
+But in t5 the recv buffer/initial window size is 2048 which would imply that it 
+can only store 2 packets.  Shouldn't the receive buffer/window 
+be at least 4096 bytes in size.
+
+receive buffer and window:  Is there a recommended size for the receive window/buffer. lab 5 shows a maximum window size of 2048 (2 packets). But the text book and lecture slides  both show the window being 5 packets in size (5120bytes for RDP). It seems more intuitive  to have the window be at least 4 packets in size for error-recovery. Specifically  in terms of the fast retransmit (if 3 duplicate ACKS). Aside note - how would fast retransmit be done with a smaller window/buffer? "You may send or receive a big packet that consists of several small ACK/DAT packets" What does this statement mean by small and several? Isn't it only ever possible for there to be one  packet that has a payload less than 1024 ( when -> file < 1024bytes || tail of file) other wise  the payload would always be 1024bytes. Therefore wouldn't several mean current_windowsize/1024 and small would mean 1024bytes except for the last packet read? (pardon all of the assumptions made but this is my current understanding) 
+
+
+Is there a recommended size for the receive window/buffer. lab 5 shows a maximum window size of 2048 (2 packets). But the text book and lecture slides  both show the window being 5 packets in size (5120bytes for RDP). It seems more intuitive  to have the window be at least 4 packets in size for error-recovery. Specifically  in terms of the fast re-transmit (if 3 duplicate ACKS). Aside note - how would fast re-transmit be done with a smaller window/buffer?
+Assumptions: "You may send or receive a big packet that consists of several small ACK/DAT packets" Isn't it only ever possible for there to be one  packet that has a payload less than 1024 ( when -> file < 1024bytes || tail of file) other wise  the payload would always be 1024bytes. Therefore wouldn't several mean current_windowsize/1024 and small would mean 1024bytes except for the last packet read? (pardon all of the assumptions made but this is my current understanding)
+

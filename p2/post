@@ -1,0 +1,23 @@
+Can the data file be broken up in to 1024 byte chunks in the application layer enqueued then passed to the sender?
+
+is this design fine? 
+
+Wait for SYN ACK.
+application layer: 
+    immediately split the file into 1024 byte pieces, enque each peice.
+    sender makes a call in main to receive data (get_nowait)
+sender:
+    enque each 1024 peice 
+    packetize 
+    enque each packet
+    start sending MSS packets to receiver. 
+
+OR: 
+
+application layer:
+    data is continuously sent in a data stream. (the max send amount) by calls from sender.
+sender:
+    the sender stores the continuous data stream.
+    then packet size (payload size) is determined on the fly as the sender receives ACKs. 
+    should the sender wait until the rcv window can store the maximum segment size? Or send 
+    as much data (up to a threshold) as it can. 

@@ -43,7 +43,10 @@ class HTTP_handler:
         request_lines = message.splitlines()
 
         if len(request_lines) < 1:
-            return
+            self.response = code400 + new_line + "Connection: close" + new_line * 2
+            self.con_type = "close"
+            self.code = code400
+            return self.response
 
         request_line = request_lines[0]
         self.req = request_line
@@ -127,13 +130,6 @@ while inputs:
                     if s not in outputs:
                         outputs.append(s)
 
-                    '''
-                    msg = next_msg
-                    f_msg = re.split(r"\r\n|\n", next_msg)[0]
-                    response, code, conn_type, f_ip, f_port = handle_request(msg, s, f_ip, f_port)
-                    s.send(response.encode())
-                    print(f"{current_time}: {f_ip}:{f_port} {f_msg}; {code} ")
-                    '''
                     tm = strftime("%a %b %d %H:%M:%S %Z %Y")
                     f_ip = s.getpeername()[0]
                     f_port = s.getpeername()[1]

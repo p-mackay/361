@@ -1,0 +1,110 @@
+import socket
+import select
+from enum import Enum
+
+ip = "localhost"
+port = 8888
+timeout = 1
+
+# Initialize UDP socket
+udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+udp_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+udp_sock.bind((ip, port))
+
+# Define states using the Enum class
+class State(Enum):
+    CLOSED = "closed"
+    SYN_SENT = "syn_sent"
+    OPEN = "open"
+    FIN_SENT = "fin_sent"
+
+# RDP Sender Class
+class Rdp_sender:
+    def __init__(self, udp_sock, dest_ip, dest_port):
+        self.udp_sock = udp_sock
+        self.dest_ip = dest_ip
+        self.dest_port = dest_port
+        self.state = State.CLOSED
+        self.snd_buf = []
+
+    def open(self):
+        if self.state == State.CLOSED:
+            syn_packet = "SYN\n\n".encode()
+            self.snd_buf.append(syn_packet)
+            self.state = State.SYN_SENT
+            print("Sender: Sent SYN packet")
+
+    def close(self):
+        if self.state == State.OPEN:
+            fin_packet = "FIN\n\n".encode()
+            self.snd_buf.append(fin_packet)
+            self.state = State.FIN_SENT
+            print("Sender: Sent FIN packet")
+
+    def send_data(self, data):
+        if self.state == State.OPEN:
+            dat_packet = f"DAT\nLength: {len(data)}\n\n{data}".encode()
+            self.snd_buf.append(dat_packet)
+            print(f"Sender: Sent data packet")
+
+    def rcv_ack(self, packet):
+        if self.state == State.SYN_SENT and packet.startswith(b"ACK"):
+            self.state = State.OPEN
+            print("Sender: Connection established")
+        elif self.state == State.FIN_SENT and packet.startswith(b"ACK"):
+            self.state = State.CLOSED
+            print("Sender: Connection closed")
+
+    def getstate(self):
+        return self.state
+
+# RDP Receiver Class
+class Rdp_receiver:
+    def __init__(self, udp_sock):
+        self.udp_sock = udp_sock
+        self.state = State.CLOSED
+
+    def rcv_data(self, packet):
+        if packet.startswith(b"SYN"):
+            self.state = State.OPEN
+            ack_packet = "ACK\n\n".encode()
+            self.udp_sock.sendto(ack_packet, (ip, port))
+            print("Receiver: Sent ACK for SYN")
+        elif packet.startswith(b"FIN"):
+            self.state = State.CLOSED
+            ack_packet = "ACK\n\n".encode()
+            self.udp_sock.sendto(ack_packet, (ip, port))
+            print("Receiver: Sent ACK for FIN")
+        elif packet.startswith(b"DAT"):
+            print(f"Receiver: Received data packet {packet}")
+
+    def getstate(self):
+        return self.state
+
+# Instantiate sender and receiver
+rdp_sender = Rdp_sender(udp_sock, ip, port)
+rdp_receiver = Rdp_receiver(udp_sock)
+
+rdp_sender.open()
+
+data = b'Hello'
+
+# Main loop
+while rdp_sender.getstate() != State.CLOSED or rdp_receiver.getstate() != State.CLOSED:
+    readable, writable, exceptional = select.select([udp_sock], [udp_sock], [udp_sock], timeout)
+
+    if udp_sock in readable:
+        packet, _ = udp_sock.recvfrom(1024)
+        rdp_receiver.rcv_data(packet)
+        rdp_sender.rcv_ack(packet)
+
+    if udp_sock in writable and rdp_sender.snd_buf:
+        if rdp_sender.getstate() == State.OPEN:
+            rdp_sender.send_data(data)
+        else:
+            packet = rdp_sender.snd_buf.pop(0)
+            udp_sock.sendto(packet, (ip, port))
+
+# Close the socket
+udp_sock.close()
+
