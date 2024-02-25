@@ -1,0 +1,19 @@
+sender:
+Sat Oct 01 06:54:09 PDT 2022: Send;     SYN; Sequence: 0; Length: 0
+receiver:
+Sat Oct 01 06:54:09 PDT 2022: Receive;  SYN; Sequence: 0; Length: 0
+Sat Oct 01 06:54:09 PDT 2022: Send;     ACK; Acknowledgment: 1; Window: 2048
+sender:
+Sat Oct 01 06:54:09 PDT 2022: Receive;  ACK; Acknowledgment: 1; Window: 2048
+Sat Oct 01 06:54:09 PDT 2022: Send;     DAT; Sequence: 1; Length: 1024
+receiver:
+Sat Oct 01 06:54:10 PDT 2022: Receive;  DAT; Sequence: 1; Length: 1024
+Sat Oct 01 06:54:10 PDT 2022: Send;     ACK; Acknowledgment: 1025; Window: 1024
+sender:
+Sat Oct 01 06:54:10 PDT 2022: Receive;  ACK; Acknowledgment: 1025; Window: 1024
+Sat Oct 01 06:54:10 PDT 2022: Send;     FIN; Sequence: 1025; Length: 0
+receiver:
+Sat Oct 01 06:54:10 PDT 2022: Receive;  FIN; Sequence: 1025; Length: 0
+Sat Oct 01 06:54:10 PDT 2022: Send;     ACK; Acknowledgment: 1026; Window: 2048
+sender:
+Sat Oct 01 06:54:10 PDT 2022: Receive;  ACK; Acknowledgment: 1026; Window: 2048

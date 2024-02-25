@@ -1,0 +1,11 @@
+GET /notfound HTTP/1.0
+Connection: keep-alive
+
+GET /small.html HTTP/1.0
+Connection: keep-alive
+
+get /notfound HTTP/1.0
+Connection: keep-alive
+
+GET /small.html HTTP/1.0
+

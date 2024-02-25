@@ -1,0 +1,11 @@
+12:32:05.198918 IP 192.168.1.100 > 10.10.1.100: ICMP echo request, id 646, seq 1, length 64
+12:32:05.198936 IP 10.10.1.100 > 192.168.1.100: ICMP echo reply, id 646, seq 1, length 64
+12:32:06.207170 IP 192.168.1.100 > 10.10.1.100: ICMP echo request, id 646, seq 2, length 64
+12:32:06.207220 IP 10.10.1.100 > 192.168.1.100: ICMP echo reply, id 646, seq 2, length 64
+12:32:07.231128 IP 192.168.1.100 > 10.10.1.100: ICMP echo request, id 646, seq 3, length 64
+12:32:07.231178 IP 10.10.1.100 > 192.168.1.100: ICMP echo reply, id 646, seq 3, length 64
+12:32:10.430901 ARP, Request who-has 192.168.1.100 tell 192.168.1.1, length 28
+12:32:10.430938 ARP, Request who-has 192.168.1.1 tell 192.168.1.100, length 28
+12:32:10.431011 ARP, Reply 192.168.1.1 is-at 76:0c:8c:5f:a4:41, length 28
+12:32:10.430992 ARP, Reply 192.168.1.100 is-at 22:5c:ae:dd:6a:b0, length 28
+

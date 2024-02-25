@@ -1,0 +1,8 @@
+18:26:20.959704 IP (tos 0x0, ttl 64, id 46145, offset 0, flags [none], proto UDP (17), length 53)
+    latitude.55165 > dns9.quad9.net.domain: [udp sum ok] 54378+ A? uvic.ca. (25)
+18:26:21.014158 IP (tos 0x0, ttl 64, id 55168, offset 0, flags [DF], proto UDP (17), length 69)
+    dns9.quad9.net.domain > latitude.55165: [udp sum ok] 54378 q: A? uvic.ca. 1/0/0 uvic.ca. [2m11s] A 142.104.197.120 (41)
+18:26:21.015117 IP (tos 0x0, ttl 64, id 41850, offset 0, flags [none], proto UDP (17), length 53)
+    latitude.35808 > dns9.quad9.net.domain: [udp sum ok] 62286+ AAAA? uvic.ca. (25)
+18:26:21.096017 IP (tos 0x0, ttl 64, id 55172, offset 0, flags [DF], proto UDP (17), length 81)
+    dns9.quad9.net.domain > latitude.35808: [udp sum ok] 62286 q: AAAA? uvic.ca. 1/0/0 uvic.ca. [5m] AAAA 2607:f8f0:c10::100 (53)

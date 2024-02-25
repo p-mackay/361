@@ -1,0 +1,30 @@
+traceroute to 8.8.8.8 (8.8.8.8), 30 hops max, 60 byte packets
+ 1  _gateway (10.0.0.1)  41.554 ms  43.934 ms  43.863 ms
+ 2  24.68.0.1 (24.68.0.1)  48.459 ms  53.433 ms  53.724 ms
+ 3  rd1cv-be124-1.gv.shawcable.net (64.59.162.113)  56.098 ms  56.037 ms  55.979 ms
+ 4  24.244.62.1 (24.244.62.1)  54.196 ms  53.789 ms  54.277 ms
+ 5  24.244.61.109 (24.244.61.109)  53.304 ms  53.605 ms  54.816 ms
+ 6  rd1lp-be1.gv.shawcable.net (66.163.72.22)  58.942 ms  13.502 ms  13.232 ms
+ 7  rc1wt-be40.wa.shawcable.net (66.163.68.18)  15.786 ms  13.162 ms  14.161 ms
+ 8  72.14.221.102 (72.14.221.102)  20.696 ms  21.705 ms  21.147 ms
+ 9  * * *
+10  dns.google (8.8.8.8)  19.982 ms  19.919 ms  19.859 ms
+
+10.0.0.1
+24.68.0.1
+64.59.162.113
+24.244.62.1
+24.244.61.109
+66.163.72.22
+66.163.68.18
+72.14.221.102
+8.8.8.8
+OrgName:        Internet Assigned Numbers Authority
+OrgName:        Shaw Communications Inc.
+OrgName:        Shaw Communications Inc.
+OrgName:        Shaw Communications Inc.
+OrgName:        Shaw Communications Inc.
+OrgName:        Shaw Communications Inc.
+OrgName:        Shaw Communications Inc.
+OrgName:        Google LLC
+OrgName:        Google LLC

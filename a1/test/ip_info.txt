@@ -1,0 +1,367 @@
+172.16.1.2
+Organization:   Internet Assigned Numbers Authority (IANA)
+Comment:        These addresses were assigned by the IETF, the organization that develops Internet protocols, in the Best Current Practice document, RFC 1918 which can be found at:
+--------------------------------------------------------------------
+172.17.0.1
+Organization:   Internet Assigned Numbers Authority (IANA)
+Comment:        These addresses were assigned by the IETF, the organization that develops Internet protocols, in the Best Current Practice document, RFC 1918 which can be found at:
+--------------------------------------------------------------------
+192.168.122.1
+Organization:   Internet Assigned Numbers Authority (IANA)
+Comment:        These addresses were assigned by the IETF, the organization that develops Internet protocols, in the Best Current Practice document, RFC 1918 which can be found at:
+--------------------------------------------------------------------
+142.104.74.65
+Organization:   University of Victoria (UNIVER-183-Z)
+   Location
+
+   City
+          Victoria
+
+   Region
+          British Columbia (BC)
+
+   Postal code
+          V8P
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          48.4574 (lat) / -123.3436 (long)
+
+   Time
+          2024-01-21 16:36:28 (America/Vancouver)
+
+   Network
+
+   IP address
+          142.104.74.65
+
+   Hostname
+          n-gateway.csc.uvic.ca
+
+   Provider
+          UVIC-AS
+
+   ASN
+--------------------------------------------------------------------
+142.104.124.105
+Organization:   University of Victoria (UNIVER-183-Z)
+   Location
+
+   City
+          Victoria
+
+   Region
+          British Columbia (BC)
+
+   Postal code
+          V8R
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          48.4471 (lat) / -123.3018 (long)
+
+   Time
+          2024-01-21 16:36:30 (America/Vancouver)
+
+   Network
+
+   IP address
+          142.104.124.105
+
+   Hostname
+          142.104.124.105
+
+   Provider
+          UVIC-AS
+
+   ASN
+--------------------------------------------------------------------
+142.104.100.241
+Organization:   University of Victoria (UNIVER-183-Z)
+   Location
+
+   City
+          Victoria
+
+   Region
+          British Columbia (BC)
+
+   Postal code
+          V8Y
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          48.5249 (lat) / -123.3615 (long)
+
+   Time
+          2024-01-21 16:36:31 (America/Vancouver)
+
+   Network
+
+   IP address
+          142.104.100.241
+
+   Hostname
+          142.104.100.241
+
+   Provider
+          UVIC-AS
+
+   ASN
+--------------------------------------------------------------------
+142.104.100.189
+Organization:   University of Victoria (UNIVER-183-Z)
+   Location
+
+   City
+          Victoria
+
+   Region
+          British Columbia (BC)
+
+   Postal code
+          V8Y
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          48.5249 (lat) / -123.3615 (long)
+
+   Time
+          2024-01-21 16:36:33 (America/Vancouver)
+
+   Network
+
+   IP address
+          142.104.100.189
+
+   Hostname
+          cle-core-edge.bb.uvic.ca
+
+   Provider
+          UVIC-AS
+
+   ASN
+--------------------------------------------------------------------
+207.23.244.233
+Organization:   BCnet (BC-Z)
+   Location
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          43.6319 (lat) / -79.3716 (long)
+
+   Time
+          2024-01-21 19:36:34 (America/Toronto)
+
+   Network
+
+   IP address
+          207.23.244.233
+
+   Hostname
+          207.23.244.233
+
+   Provider
+          BCNET-AS
+
+   ASN
+--------------------------------------------------------------------
+199.212.24.98
+Organization:   CANARIE Inc (CANARI)
+   Location
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          43.6319 (lat) / -79.3716 (long)
+
+   Time
+          2024-01-21 19:36:36 (America/Toronto)
+
+   Network
+
+   IP address
+          199.212.24.98
+
+   Hostname
+          vctr3rtr1.network.canarie.ca
+
+   Provider
+          CANARIE-NTN
+
+   ASN
+--------------------------------------------------------------------
+199.212.24.228
+Organization:   CANARIE Inc (CANARI)
+   Location
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          43.6319 (lat) / -79.3716 (long)
+
+   Time
+          2024-01-21 19:36:38 (America/Toronto)
+
+   Network
+
+   IP address
+          199.212.24.228
+
+   Hostname
+          199.212.24.228
+
+   Provider
+          CANARIE-NTN
+
+   ASN
+--------------------------------------------------------------------
+199.212.24.229
+Organization:   CANARIE Inc (CANARI)
+   Location
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          43.6319 (lat) / -79.3716 (long)
+
+   Time
+          2024-01-21 19:36:39 (America/Toronto)
+
+   Network
+
+   IP address
+          199.212.24.229
+
+   Hostname
+          199.212.24.229
+
+   Provider
+          CANARIE-NTN
+
+   ASN
+--------------------------------------------------------------------
+74.125.243.177
+Organization:   Google LLC (GOGL)
+   Location
+
+   Country
+          United States (US)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          37.751 (lat) / -97.822 (long)
+
+   Time
+          2024-01-21 18:36:41 (America/Chicago)
+
+   Network
+
+   IP address
+          74.125.243.177
+
+   Hostname
+          74.125.243.177
+
+   Provider
+          GOOGLE
+
+   ASN
+--------------------------------------------------------------------
+142.251.50.177
+Organization:   Google LLC (GOGL)
+   Location
+
+   Country
+          United States (US)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          37.751 (lat) / -97.822 (long)
+
+   Time
+          2024-01-21 18:36:42 (America/Chicago)
+
+   Network
+
+   IP address
+          142.251.50.177
+
+   Hostname
+          142.251.50.177
+
+   Provider
+          GOOGLE
+
+   ASN
+--------------------------------------------------------------------
+8.8.8.8
+Organization:   Google LLC (GOGL)
+   Location
+
+   Country
+          United States (US)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          37.751 (lat) / -97.822 (long)
+
+   Time
+          2024-01-21 18:36:44 (America/Chicago)
+
+   Network
+
+   IP address
+          8.8.8.8
+
+   Hostname
+          dns.google
+
+   Provider
+          GOOGLE
+
+   ASN
+--------------------------------------------------------------------

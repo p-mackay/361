@@ -1,0 +1,8 @@
+Collected: 12 tests
+=========
+Running test: test_start_server
+ --- Server Output ---
+Cannot open network namespace "h2": No such file or directory
+
+ ---
+Failed to start server.

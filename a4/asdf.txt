@@ -1,0 +1,17 @@
+test 172.16.1.1
+
+then test 9.9.9.9
+
+
+recursive
+
+iterative
+
+dig @172.16.1.1 uvic.ca
+dig +trace @172.16.1.1 uvic.ca
+
+
+dig @9.9.9.9 uvic.ca
+dig +trace @9.9.9.9 uvic.ca
+
+

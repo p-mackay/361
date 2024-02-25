@@ -1,0 +1,73 @@
+10.0.0.1
+Organization:   Internet Assigned Numbers Authority (IANA)
+Comment:        These addresses were assigned by the IETF, the organization that develops Internet protocols, in the Best Current Practice document, RFC 1918 which can be found at:
+--------------------------------------------------------------------
+24.68.0.1
+Organization:   Shaw Communications Inc. (SHAWC)
+   Location
+
+   City
+          Victoria
+
+   Region
+          British Columbia (BC)
+
+   Postal code
+          V8Z
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          48.4983 (lat) / -123.4005 (long)
+
+   Time
+          2024-01-20 03:39:11 (America/Vancouver)
+
+   Network
+
+   IP address
+          24.68.0.1
+
+   Hostname
+          24.68.0.1
+
+   Provider
+          SHAW
+
+   ASN
+--------------------------------------------------------------------
+64.59.162.113
+Organization:   Shaw Communications Inc. (SHAWC-1)
+   Location
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          43.6319 (lat) / -79.3716 (long)
+
+   Time
+          2024-01-20 06:39:12 (America/Toronto)
+
+   Network
+
+   IP address
+          64.59.162.113
+
+   Hostname
+          rd1cv-be124-1.gv.shawcable.net
+
+   Provider
+          SHAW
+
+   ASN
+--------------------------------------------------------------------
+24.244.62.1
+Organization:   Shaw Communications Inc. (SHAWC-1)

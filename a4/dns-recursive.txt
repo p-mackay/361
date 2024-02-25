@@ -1,0 +1,4 @@
+20:03:02.904322 IP (tos 0x0, ttl 64, id 55755, offset 0, flags [none], proto UDP (17), length 76)
+    192.168.1.100.53076 > 172.16.1.1.domain: [udp sum ok] 64384+ [1au] A? uvic.ca. ar: . OPT UDPsize=4096 [COOKIE 8a07629000a6d1f9] (48)
+20:03:03.141366 IP (tos 0x0, ttl 64, id 40329, offset 0, flags [DF], proto UDP (17), length 108)
+    172.16.1.1.domain > 192.168.1.100.53076: [udp sum ok] 64384 q: A? uvic.ca. 1/0/1 uvic.ca. [5m] A 142.104.197.120 ar: . OPT UDPsize=4096 [COOKIE 8a07629000a6d1f9 0100000065c6f5770142a668a0250d6b] (80)

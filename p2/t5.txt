@@ -1,0 +1,64 @@
+RDP Packet Format
+●
+Similar to HTTP format
+COMMAND
+Header: Value
+…
+Header: Value
+PAYLOAD
+5
+COMMAND := SYN|FIN|DAT|ACK|RST
+●
+SYN: Establish connection
+●
+FIN: Terminate connection
+●
+RST: Reset connection
+●
+DAT: Send data
+●
+ACK: Acknowledge received data
+●
+Note: Command is case-sensitive
+
+RDP Packet Format
+●
+Similar to HTTP format
+COMMAND
+Header: Value
+…
+Header: Value
+PAYLOAD
+6
+Header  := Sequence|Acknowledgment|Window|Length
+●
+Sequence: Provides the sequence number associated with the 
+packet (the first byte of the PAYLOAD if any)
+●
+Acknowledgment: The sequence number expected by the 
+receiver (the next byte of the PAYLOAD if any)
+●
+Window: The size of the receiver’s window in bytes
+●
+Length: The length of the PAYLOAD in bytes
+●
+Empty line indicates end of headers
+●
+Note: Headers are case-sensitive
+
+RDP Packet Format
+●
+Similar to HTTP format
+COMMAND
+Header: Value
+…
+Header: Value
+PAYLOAD
+7
+●
+PAYLOAD, if existing, is the actual data sent from the sender to 
+the receiver
+●
+PAYLOAD is at most 1024 bytes
+●
+PAYLOAD is case-sensitive

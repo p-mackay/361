@@ -1,0 +1,24 @@
+City
+Victoria
+Region
+British Columbia (BC)
+Postal code
+V8X
+Country
+Canada (CA)
+Continent
+North America (NA)
+Coordinates
+48.4777 (lat) / -123.3658 (long)
+Time
+2024-01-14 18:38:58 (America/Vancouver)
+NETWORK
+
+IP address
+2604:3d08:2c83:400::be41
+Hostname
+2604:3d08:2c83:400::be41
+Provider
+SHAW
+ASN
+6327

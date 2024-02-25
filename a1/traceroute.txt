@@ -1,0 +1,312 @@
+traceroute to 8.8.8.8 (8.8.8.8), 30 hops max, 60 byte packets
+ 1  _gateway (10.0.0.1)  41.554 ms  43.934 ms  43.863 ms
+ 2  24.68.0.1 (24.68.0.1)  48.459 ms  53.433 ms  53.724 ms
+ 3  rd1cv-be124-1.gv.shawcable.net (64.59.162.113)  56.098 ms  56.037 ms  55.979 ms
+ 4  24.244.62.1 (24.244.62.1)  54.196 ms  53.789 ms  54.277 ms
+ 5  24.244.61.109 (24.244.61.109)  53.304 ms  53.605 ms  54.816 ms
+ 6  rd1lp-be1.gv.shawcable.net (66.163.72.22)  58.942 ms  13.502 ms  13.232 ms
+ 7  rc1wt-be40.wa.shawcable.net (66.163.68.18)  15.786 ms  13.162 ms  14.161 ms
+ 8  72.14.221.102 (72.14.221.102)  20.696 ms  21.705 ms  21.147 ms
+ 9  * * *
+10  dns.google (8.8.8.8)  19.982 ms  19.919 ms  19.859 ms
+
+10.0.0.1
+24.68.0.1
+64.59.162.113
+24.244.62.1
+24.244.61.109
+66.163.72.22
+66.163.68.18
+72.14.221.102
+8.8.8.8
+OrgName:        Internet Assigned Numbers Authority
+OrgName:        Shaw Communications Inc.
+OrgName:        Shaw Communications Inc.
+OrgName:        Shaw Communications Inc.
+OrgName:        Shaw Communications Inc.
+OrgName:        Shaw Communications Inc.
+OrgName:        Shaw Communications Inc.
+OrgName:        Google LLC
+OrgName:        Google LLC
+
+10.0.0.1
+Organization:   Internet Assigned Numbers Authority (IANA)
+Comment:        These addresses were assigned by the IETF, the organization that develops Internet protocols, in the Best Current Practice document, RFC 1918 which can be found at:
+--------------------------------------------------------------------
+24.68.0.1
+Organization:   Shaw Communications Inc. (SHAWC)
+   Location
+
+   City
+          Victoria
+
+   Region
+          British Columbia (BC)
+
+   Postal code
+          V8Z
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          48.4983 (lat) / -123.4005 (long)
+
+   Time
+          2024-01-20 03:39:54 (America/Vancouver)
+
+   Network
+
+   IP address
+          24.68.0.1
+
+   Hostname
+          24.68.0.1
+
+   Provider
+          SHAW
+
+   ASN
+--------------------------------------------------------------------
+64.59.162.113
+Organization:   Shaw Communications Inc. (SHAWC-1)
+   Location
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          43.6319 (lat) / -79.3716 (long)
+
+   Time
+          2024-01-20 06:39:55 (America/Toronto)
+
+   Network
+
+   IP address
+          64.59.162.113
+
+   Hostname
+          rd1cv-be124-1.gv.shawcable.net
+
+   Provider
+          SHAW
+
+   ASN
+--------------------------------------------------------------------
+24.244.62.1
+Organization:   Shaw Communications Inc. (SHAWC-1)
+   Location
+
+   City
+          Edmonton
+
+   Region
+          Alberta (AB)
+
+   Postal code
+          T5Y
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          53.655 (lat) / -113.3784 (long)
+
+   Time
+          2024-01-20 04:39:57 (America/Edmonton)
+
+   Network
+
+   IP address
+          24.244.62.1
+
+   Hostname
+          24.244.62.1
+
+   Provider
+          SHAW
+
+   ASN
+--------------------------------------------------------------------
+24.244.61.109
+Organization:   Shaw Communications Inc. (SHAWC-1)
+   Location
+
+   City
+          Edmonton
+
+   Region
+          Alberta (AB)
+
+   Postal code
+          T5Y
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          53.655 (lat) / -113.3784 (long)
+
+   Time
+          2024-01-20 04:39:59 (America/Edmonton)
+
+   Network
+
+   IP address
+          24.244.61.109
+
+   Hostname
+          24.244.61.109
+
+   Provider
+          SHAW
+
+   ASN
+--------------------------------------------------------------------
+66.163.72.22
+Organization:   Shaw Communications Inc. (SHAWC-2)
+   Location
+
+   City
+          Surrey
+
+   Region
+          British Columbia (BC)
+
+   Postal code
+          V3Z
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          49.1049 (lat) / -122.824 (long)
+
+   Time
+          2024-01-20 03:40:00 (America/Vancouver)
+
+   Network
+
+   IP address
+          66.163.72.22
+
+   Hostname
+          rd1lp-be1.gv.shawcable.net
+
+   Provider
+          SHAW
+
+   ASN
+--------------------------------------------------------------------
+66.163.68.18
+Organization:   Shaw Communications Inc. (SHAWC-2)
+   Location
+
+   City
+          Surrey
+
+   Region
+          British Columbia (BC)
+
+   Postal code
+          V3Z
+
+   Country
+          Canada (CA)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          49.1049 (lat) / -122.824 (long)
+
+   Time
+          2024-01-20 03:40:02 (America/Vancouver)
+
+   Network
+
+   IP address
+          66.163.68.18
+
+   Hostname
+          rc1wt-be40.wa.shawcable.net
+
+   Provider
+          SHAW
+
+   ASN
+--------------------------------------------------------------------
+72.14.221.102
+Organization:   Google LLC (GOGL)
+   Location
+
+   Country
+          United States (US)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          37.751 (lat) / -97.822 (long)
+
+   Time
+          2024-01-20 05:40:03 (America/Chicago)
+
+   Network
+
+   IP address
+          72.14.221.102
+
+   Hostname
+          72.14.221.102
+
+   Provider
+          GOOGLE
+
+   ASN
+--------------------------------------------------------------------
+8.8.8.8
+Organization:   Google LLC (GOGL)
+   Location
+
+   Country
+          United States (US)
+
+   Continent
+          North America (NA)
+
+   Coordinates
+          37.751 (lat) / -97.822 (long)
+
+   Time
+          2024-01-20 05:40:05 (America/Chicago)
+
+   Network
+
+   IP address
+          8.8.8.8
+
+   Hostname
+          dns.google
+
+   Provider
+          GOOGLE
+
+   ASN
+--------------------------------------------------------------------
