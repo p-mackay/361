@@ -1,0 +1,71 @@
+\documentclass{article}
+\usepackage{enumerate}
+\usepackage{titling}
+\usepackage{listings}
+\usepackage{changepage}
+\usepackage{graphicx}
+\usepackage[margin=0.75in]{geometry}
+
+\lstset{
+    basicstyle=\ttfamily,
+    breaklines=true,
+    columns=fullflexible
+}
+
+\setlength{\droptitle}{-2cm}
+\title{CSC361: Assignment 6 (a6)}
+\author{Paul MacKay}
+
+\begin{document}
+
+\maketitle
+
+\section{}
+{\small
+\begin{lstlisting}
+19:01:56.364121 IP 192.168.1.100.35938 > 10.10.1.100.5001: Flags [S], seq 463990258, win 33120, options [mss 736,sackOK,TS val 2778165407 ecr 0,nop,wscale 7], length 0
+19:01:57.371595 IP 192.168.1.100.35938 > 10.10.1.100.5001: Flags [S], seq 463990258, win 33120, options [mss 736,sackOK,TS val 2778166414 ecr 0,nop,wscale 7], length 0
+19:01:57.471729 IP 10.10.1.100.5001 > 192.168.1.100.35938: Flags [S.], seq 639626890, ack 463990259, win 1448, options [mss 736,sackOK,TS val 3807550556 ecr 2778166414,nop,wscale 0], length 0
+19:01:57.471787 IP 192.168.1.100.35938 > 10.10.1.100.5001: Flags [.], ack 1, win 259, options [nop,nop,TS val 2778166514 ecr 3807550556], length 0
+\end{lstlisting}
+    \textbf{There are 4 packets sent to establish a connection. The first SYN packet sent was sent twice.}
+\begin{lstlisting}
+19:01:57.472287 IP 192.168.1.100.35938 > 10.10.1.100.5001: Flags [P.], seq 1:61, ack 1, win 259, options [nop,nop,TS val 2778166515 ecr 3807550556], length 60
+19:01:57.472335 IP 192.168.1.100.35938 > 10.10.1.100.5001: Flags [P.], seq 61:785, ack 1, win 259, options [nop,nop,TS val 2778166515 ecr 3807550556], length 724
+\end{lstlisting}
+    \textbf{Since the window is 1448 in size the receiver can only handle one full packet at a time, so a small packet is sent(60 bytes) followed by a packet that is almost MSS in size(724 bytes).} 
+\begin{lstlisting}
+19:01:57.572443 IP 10.10.1.100.5001 > 192.168.1.100.35938: Flags [.], ack 61, win 1388, options [nop,nop,TS val 3807550657 ecr 2778166515], length 0
+19:01:57.572450 IP 10.10.1.100.5001 > 192.168.1.100.35938: Flags [.], ack 785, win 1388, options [nop,nop,TS val 3807550657 ecr 2778166515], length 0
+\end{lstlisting}
+    \textbf{The receiver send 2 ACK packets for the first and second packet sent. And the receive window is updated.}
+\begin{lstlisting}
+19:01:57.572461 IP 192.168.1.100.35938 > 10.10.1.100.5001: Flags [P.], seq 785:1509, ack 1, win 259, options [nop,nop,TS val 2778166615 ecr 3807550657], length 724
+\end{lstlisting}
+    \textbf{The sender sends one more data packet to the receiver.}
+\begin{lstlisting}
+19:01:57.572489 IP 10.10.1.100.5001 > 192.168.1.100.35938: Flags [P.], seq 1:29, ack 785, win 1388, options [nop,nop,TS val 3807550657 ecr 2778166515], length 28
+\end{lstlisting}
+    \textbf{The receiver now sends data to the sender}
+\begin{lstlisting}
+19:01:57.572497 IP 192.168.1.100.35938 > 10.10.1.100.5001: Flags [.], ack 29, win 259, options [nop,nop,TS val 2778166615 ecr 3807550657], length 0
+\end{lstlisting}
+    \textbf{The sender acknowedges the data.}
+\begin{lstlisting}
+19:01:57.653721 IP 10.10.1.100.5001 > 192.168.1.100.35938: Flags [R.], seq 29, ack 785, win 1388, options [nop,nop,TS val 3807550738 ecr 2778166515], length 0
+\end{lstlisting}
+    \textbf{Attempts to reset the connection.}
+\begin{lstlisting}
+19:01:57.672496 IP 10.10.1.100.5001 > 192.168.1.100.35938: Flags [R], seq 639626891, win 0, length 0
+19:01:57.672505 IP 10.10.1.100.5001 > 192.168.1.100.35938: Flags [R], seq 639626919, win 0, length 0
+\end{lstlisting}
+    \textbf{H2 then reports a segmentation fault.}
+}
+
+\newpage
+\section{Error Control}
+If the sender receives three duplicate ACK packets then the oldest non-acknoledeged packet is resent.
+Also if the sender does not receive an ACK packet after sending DAT packet within some time frame then,
+that DAT packet is resent.
+
+\end{document}

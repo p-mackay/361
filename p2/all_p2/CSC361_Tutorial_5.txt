@@ -1,0 +1,387 @@
+CSC361: Tutorial 5
+●
+●
+●
+
+Go through P2 specifications
+Demo
+Simple design ideas
+
+Objectives
+●
+
+Use DATAGRAM (UDP) sockets to create a Reliable Datagram Protocol (RDP)
+transceiver
+○
+○
+
+●
+
+rdp.py
+A combined sender and receiver
+
+Run on H1 in PicoNet, to interact with an echo server running on H2, over an
+unreliable link at R
+
+2
+
+Schedule
+●
+●
+
+There are three tutorials (T5, T6 and T7) and three lab sessions (L5, L6 and L7)
+over four weeks associated with this assignment
+Please follow our tutorial and lab schedule very closely for this assignment, which
+ensures its success and smoothness
+○
+
+Please consider connection management and flow control first, and then error control
+
+3
+
+RDP Requirements
+●
+●
+●
+●
+
+Use line-by-line control headers to establish (SYN) and release (FIN) connection
+Reorder out-of-order packets
+Acknowledge received packets
+Identify lost packets
+○
+
+●
+●
+●
+
+Lost packets will be retransmitted by timeout or three duplicate acknowledgments
+
+Send packets in a back-to-back way
+Support flow control with sliding window
+No congestion control required
+
+4
+
+RDP Packet Format
+●
+
+Similar to HTTP format
+
+COMMAND
+Header: Value
+…
+Header: Value
+PAYLOAD
+
+COMMAND := SYN|FIN|DAT|ACK|RST
+●
+●
+●
+●
+●
+
+SYN: Establish connection
+FIN: Terminate connection
+RST: Reset connection
+DAT: Send data
+ACK: Acknowledge received data
+
+●
+
+Note: Command is case-sensitive
+
+5
+
+RDP Packet Format
+●
+
+Similar to HTTP format
+
+COMMAND
+Header: Value
+…
+Header: Value
+PAYLOAD
+
+Header
+
+:= Sequence|Acknowledgment|Window|Length
+
+●
+●
+
+Sequence: Provides the sequence number associated with the
+packet (the first byte of the PAYLOAD if any)
+Acknowledgment: The sequence number expected by the
+receiver (the next byte of the PAYLOAD if any)
+Window: The size of the receiver’s window in bytes
+Length: The length of the PAYLOAD in bytes
+
+●
+●
+
+Empty line indicates end of headers
+Note: Headers are case-sensitive
+
+●
+●
+
+6
+
+RDP Packet Format
+●
+
+Similar to HTTP format
+
+COMMAND
+Header: Value
+…
+Header: Value
+PAYLOAD
+
+●
+●
+●
+
+PAYLOAD, if existing, is the actual data sent from the sender to
+the receiver
+PAYLOAD is at most 1024 bytes
+PAYLOAD is case-sensitive
+
+7
+
+Establish a Connection
+1.
+2.
+
+The RDP sender sends SYN first to establish the connection with the RDP receiver
+The RDP receiver sends ACK to accept the connection
+
+●
+
+RDP is unidirectional from the sender to receiver, so the receiver does not need to
+send SYN
+Sender and receiver are in the same Python script!
+
+●
+
+8
+
+Data Transfer
+●
+
+Once connected, the RDP sender can send DAT (data) packets to the receiver, each
+with a
+○
+○
+
+●
+
+The RDP receiver will acknowledge the received DAT packets cumulatively, using
+the
+○
+○
+
+●
+
+Sequence number header indicating the sequence number of the first bytes of the PAYLOAD
+Length indicating the size of the PAYLOAD in bytes
+
+Acknowledgment header indicating the first byte expected in the next PAYLOAD, as well as the
+Window size
+
+For unrecognized or incompatible COMMAND and Headers
+○
+○
+
+e.g., DAT packets missing Sequence number and Length, ACK packets missing Acknowledgment
+number and Window
+RDP will reset the connection with RST, and there is no ACK for RST
+
+9
+
+Close Connection
+1.
+2.
+
+The RDP sender sends FIN to close the connection
+RDP receiver sends back an ACK
+
+10
+
+Run & Test
+1.
+
+Create echo server:
+○
+
+●
+
+On H2:
+■
+mkfifo fifo, which makes a FIFO (named pipe) called fifo. you only need to run this
+command once at /home/jovyan
+■ cat fifo | nc -u -l 8888 > fifo, which runs nc (netcat) in UDP server mode at
+port 8888, redirects output to fifo, and pipes through fifo to nc
+
+Test echo server:
+○
+○
+
+On H1:
+■ nc -u h2 8888, and type any input—it will be echoed back by H2 and shown on H1
+On R:
+■ tcpdump -n -l -i r-eth1 udp port 8888 to verify it
+
+11
+
+Run & Test Cont’d
+2.
+
+Run RDP
+○
+
+●
+
+On H1:
+■ python3 rdp.py ip_address port_number read_file_name
+write_file_name
+● Note: ip_address and port_number are local (what you bind to)
+● The echo server is always at H2 UDP port 8888 (hardcode this!)
+
+Compare files:
+○
+
+On H1:
+■ diff read_file_name write_file_name
+
+12
+
+Output Format
+●
+
+DATE: EVENT; COMMAND; Sequence|Acknowledgment: Value; Length|Window: Value
+
+Sat Oct 01 06:54:09 PDT 2022: Send; SYN; Sequence: 0; Length: 0
+Sat Oct 01 06:54:09 PDT 2022: Receive; SYN; Sequence: 0; Length: 0
+Sat Oct 01 06:54:09 PDT 2022: Send; ACK; Acknowledgment: 1; Window: 2048
+Sat Oct 01 06:54:09 PDT 2022: Receive; ACK; Acknowledgment: 1; Window: 2048
+Sat Oct 01 06:54:09 PDT 2022: Send; DAT; Sequence: 1; Length: 1024
+Sat Oct 01 06:54:10 PDT 2022: Receive; DAT; Sequence: 1; Length: 1024
+Sat Oct 01 06:54:10 PDT 2022: Send; ACK; Acknowledgment: 1025; Window: 1024
+Sat Oct 01 06:54:10 PDT 2022: Receive; ACK; Acknowledgment: 1025; Window: 1024
+Sat Oct 01 06:54:10 PDT 2022: Send; FIN; Sequence: 1025; Length: 0
+Sat Oct 01 06:54:10 PDT 2022: Receive; FIN; Sequence: 1025; Length: 0
+Sat Oct 01 06:54:10 PDT 2022: Send; ACK; Acknowledgment: 1026; Window: 2048
+Sat Oct 01 06:54:10 PDT 2022: Receive; ACK; Acknowledgment: 1026; Window: 2048
+13
+
+Emulate packet loss & delay
+●
+
+On R:
+○
+
+○
+○
+
+tc qdisc add dev r-eth1 root netem delay 100ms
+■ Add 100 ms of delay
+■ tc: used to configure Traffic Control in the Linux kernel
+■ qdisc: short for “queueing discipline”
+■ netem: network emulator
+tc qdisc change dev r-eth1 root netem delay 100ms 10ms
+■ Add 100 ms += 10 ms of delay
+tc qdisc change dev r-eth1 root netem delay 100ms loss 25%
+■ Add 100 ms of delay and 25% packet loss
+
+14
+
+Design Ideas
+
+* RST?
+
+15
+
+Design Ideas (Driver)
+●
+
+Initialization:
+○
+○
+○
+○
+○
+
+Import packages such as socket, sys, etc.
+Initialize a UDP socket: udp_sock
+■ You will only need a single socket!
+Initialize a sending buffer: snd_buf
+Initialize a receiving buffer: rcv_buf
+Initialize two classes: rdp_sender, rdp_receiver
+
+16
+
+Design Ideas (Driver) Cont’d
+while (rdp_sender.getstate()
+!= close) or
+(rdp_receiver.getstate() != close):
+readable, writable, exceptional = select.select([udp_sock],
+[udp_sock],
+[udp_sock],
+timeout)
+if udp_sock in readable:
+# receive data and append it into rcv_buf
+if the message in rcv_buf is complete (detect a new line):
+# extract the message from rcv_buf
+# split the message into RDP packets
+for each packet:
+if RDP packet is ACK:
+rdp_sender.rcv_ack(message)
+else:
+rdp_receiver.rcv_data(message)
+
+17
+
+Design Ideas (Driver) Cont’d
+if udp_sock in writable:
+bytes_sent = udp_sock.sendto(snd_buf, ECHO_SRV)
+# remove the bytes already sent from snd_buf
+rdp_sender.check_timeout()
+
+18
+
+Design Ideas (Sender)
+class rdp_sender:
+# closed -> syn_sent -> open -> fin_sent -> closed
+state = closed
+def open(self):
+# write SYN rdp packet into snd_buf
+self.state = syn_sent
+def close(self):
+# write FIN packet to snd_buf
+self.state = fin_sent
+def check_timeout(self):
+if self.state != close and timeout has occured:
+# rewrite the rdp packets into snd_buf
+19
+
+Design Ideas (Sender)
+def rcv_ack(self):
+if self.state == syn_sent:
+if ack# is correct:
+self.state = open
+if self.state == open:
+if three duplicate received:
+# rewrite the rdp packets into snd_buf
+if ack# is correct:
+# move the sliding window
+# write the available window of DAT rdp packets into snd_buf
+# if all data has been sent, call self.close()
+if self.state == fin_sent:
+if ack# is correct:
+self.state = close
+20
+
+

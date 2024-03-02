@@ -1,0 +1,203 @@
+CSC 361 Spring 2024
+
+Lab 6: TCP Error Control
+Objective: To understand the error control in TCP
+We will see and understand how TCP does error control with an emulated 100ms additional delay and 25% packet loss at the router (R) in PicoLab.
+
+1. Capture TCP packets
+Recall the PicoLab topology shown as follows. We will introduce emulated 100ms additional delay and 25% packet loss at interface r-eth1, which
+connects router R and H2.
+Then, we use the iperf client on H1 to interact with the iperf server on H2 and use tcpdump to capture packets on both interfaces on R, allowing us
+to observe the TCP error control behaviors.
+
+Please follow the steps below to capture two trace files, i.e., tcp-error-r-eth0.cap, which captures the TCP packets before the error link, and
+tcp-error-r-eth1.cap, which captures the TCP packets after the error link. Compare the two trace files, you can find which packets are lost.
+
+1
+
+CSC 361 Spring 2024
+
+Step 1: On H2, we run iperf in server mode (-s), with window size (-w) 2896 bytes (i.e., equivalently 4 data packets of 724-byte payload each), and
+socket read size (-l) 724 bytes and MSS size (-M) 736 bytes (i.e., a 724-byte data payload plus a 12-byte TCP timestamp option).
+root@h2:/home/jovyan# iperf -s -w 2896 -l 724 -M 736
+-----------------------------------------------------------Server listening on TCP port 5001
+TCP window size: 5.66 KByte (WARNING: requested 2.83 KByte)
+-----------------------------------------------------------Step 2: On R, we first use tc (traffic control) qdisc (queue discipline) netem (network emulation) to emulate a 100ms additional delay and 25%
+packet loss at the output queue of r-eth1, i.e., when packets going from H1 via R to H2, then setup tcpdump on interface (-i) r-eth0 (i.e., before
+packet loss occurs) for TCP protocol port 5001 (used by iperf), and write (-w) the captured packets to tcp-error-r-eth0.cap as root user.
+root@r:/home/jovyan# tc qdisc
+qdisc noqueue 0: dev lo root refcnt 2
+qdisc noqueue 0: dev r-eth0 root refcnt 2
+qdisc noqueue 0: dev r-eth1 root refcnt 2
+qdisc noqueue 0: dev r-eth2 root refcnt 2
+root@r:/home/jovyan# tc qdisc add dev r-eth1 root netem delay 100ms loss 25%
+root@r:/home/jovyan# tc qdisc show dev r-eth1
+qdisc netem 8001: root refcnt 2 limit 1000 delay 100.0ms loss 25%
+root@r:/home/jovyan# tcpdump -i r-eth0 tcp port 5001 -w tcp-error-r-eth0.cap
+tcpdump: listening on r-eth0, link-type EN10MB (Ethernet), capture size 262144 bytes
+Step 3: On PicoNet (also known as the jovyan terminal), use ip netns exec r to start an additional terminal on R to conduct tcpdump on r-eth1.
+(base) jovyan@piconet:~$ sudo ip netns exec r tcpdump -i r-eth1 tcp port 5001 -w tcp-error-r-eth1.cap
+tcpdump: listening on r-eth1, link-type EN10MB (Ethernet), capture size 262144 bytes
+Step 4: On H1, run iperf as a client (-c) to send H2 (-n) 5792 bytes of data with socket write size (-l) 724 bytes and MSS size (-M) 736 bytes.
+2
+
+CSC 361 Spring 2024
+
+root@h1:/home/jovyan# iperf -c h2 -l 724 -n 5792 -M 736
+-----------------------------------------------------------Client connecting to h2, TCP port 5001
+TCP window size: 45.0 KByte (default)
+-----------------------------------------------------------[ 3] local 192.168.1.100 port 45662 connected with 10.10.1.100 port 5001
+[ ID] Interval
+Transfer
+Bandwidth
+[ 3] 0.0- 0.0 sec 5.66 KBytes
+238 Mbits/sec
+After the iperf test, we can interrupt the tcpdump by Ctrl-C, and use tcpdump -r -n to read the content of *.cap trace files.
+Note that what your captured file is very likely different from what is shown below, which is a real trace but for illustration purposes.
+
+2. Reading from file tcp-error-r-eth0.cap
+22:51:58.834920 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [S], seq 3985537874, win 65504, options [mss 736,sackOK,TS val
+3715916640 ecr 0,nop,wscale 7], length 0
+22:51:59.035365 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [S.], seq 1788771642, ack 3985537875, win 2896, options [mss
+736,sackOK,TS val 1798127388 ecr 3715916640,nop,wscale 0], length 0
+22:51:59.035404 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [.], ack 1, win 512, options [nop,nop,TS val 3715916841 ecr 1798127388],
+length 0
+The above 3-packet exchange is for TCP connection establishment, i.e., SYN, ACK+SYN and ACK. Note the MSS, SACK, TS and window
+scale options. The first two packets are shown with the absolute, random initial sequence number, and the following ones use relative seqno.
+22:51:59.035755 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [P.], seq 1:725, ack 1, win 512, options [nop,nop,TS val 3715916841 ecr
+1798127388], length 724
+22:51:59.035803 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [P.], seq 725:1449, ack 1, win 512, options [nop,nop,TS val 3715916841 ecr
+1798127388], length 724
+22:51:59.035833 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [P.], seq 1449:2173, ack 1, win 512, options [nop,nop,TS val 3715916841 ecr
+1798127388], length 724
+22:51:59.035859 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [P.], seq 2173:2897, ack 1, win 512, options [nop,nop,TS val 3715916841 ecr
+1798127388], length 724
+
+3
+
+CSC 361 Spring 2024
+
+With an advertised window size of 2896 bytes from H2, H1 can send 4 data packets of 724-byte payload each, to H2 in one burst.
+22:51:59.135900 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [.], ack 1, win 2896, options [nop,nop,TS val 1798127488 ecr
+3715916841,nop,nop,sack 1 {725:1449}], length 0
+This acknowledgment indicates H2 has received the 2nd data packet with a ~100ms rtt, but not the 1st one, which is likely dropped by R.
+22:51:59.135930 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [.], ack 1, win 2896, options [nop,nop,TS val 1798127488 ecr
+3715916841,nop,nop,sack 2 {2173:2897}{725:1449}], length 0
+This acknowledgement indicates H2 has received the 4th (and previously the 2nd) data packet, but not the 1st and 3rd one.
+22:51:59.174768 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [P.], seq 1:725, ack 1, win 512, options [nop,nop,TS val 3715916980 ecr
+1798127488], length 724
+H1 retransmits the 1st data packet, ~140ms after its initial transmission, due to timeout.
+22:51:59.275011 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [.], ack 1449, win 1448, options [nop,nop,TS val 1798127627 ecr
+3715916980,nop,nop,sack 1 {2173:2897}], length 0
+This acknowledgment indicates H2 has received the retransmitted 1st data packet, but still misses the 3rd packet.
+22:51:59.275033 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [P.], seq 1449:2173, ack 1, win 512, options [nop,nop,TS val 3715917080 ecr
+1798127627], length 724
+H1 retransmits the 3rd data packet, as the new ack=1449 slides forward its flow control window.
+22:51:59.874952 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [P.], seq 1449:2173, ack 1, win 512, options [nop,nop,TS val 3715917680 ecr
+1798127627], length 724
+H1 retransmits the 3rd data packet again, ~600ms after its first retransmission, due to a timeout.
+22:52:01.026772 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [P.], seq 1449:2173, ack 1, win 512, options [nop,nop,TS val 3715918832 ecr
+1798127627], length 724
+4
+
+CSC 361 Spring 2024
+
+H1 retransmits the 3rd data packet for the third time, ~1200ms after its second retransmission, due to another timeout.
+22:52:01.127015 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [.], ack 2897, win 1448, options [nop,nop,TS val 1798129479 ecr
+3715918832], length 0
+This acknowledgment indicates H2 has received all first four data packets.
+22:52:01.127038 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [.], seq 2897:3621, ack 1, win 512, options [nop,nop,TS val 3715918932 ecr
+1798129479], length 724
+22:52:01.127042 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [P.], seq 3621:4345, ack 1, win 512, options [nop,nop,TS val 3715918932 ecr
+1798129479], length 724
+H1 transmits the 5th and 6th data packet.
+22:52:01.227165 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [.], ack 4345, win 1448, options [nop,nop,TS val 1798129579 ecr
+3715918932], length 0
+This acknowledgment indicates H2 has received all first six data packets.
+22:52:01.227188 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [.], seq 4345:5069, ack 1, win 512, options [nop,nop,TS val 3715919033 ecr
+1798129579], length 724
+22:52:01.227189 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [FP.], seq 5069:5793, ack 1, win 512, options [nop,nop,TS val 3715919033
+ecr 1798129579], length 724
+H1 transmits the 7th and 8th data packet, and initiates the closure of its data flow.
+22:52:01.327358 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [.], ack 5069, win 1448, options [nop,nop,TS val 1798129680 ecr
+3715919033], length 0
+This acknowledgment indicates H2 has received all first seven data packets, but not the 8th yet.
+22:52:01.826852 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [FP.], seq 5069:5793, ack 1, win 512, options [nop,nop,TS val 3715919632
+ecr 1798129680], length 724
+5
+
+CSC 361 Spring 2024
+
+H2 retransmits the 8th data packet, ~600ms after its initial transmission, due to timeout.
+22:52:01.927217 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [.], ack 5794, win 1448, options [nop,nop,TS val 1798130280 ecr
+3715919632], length 0
+This acknowledgment indicates H2 has finally received all eight data packets.
+22:52:01.936380 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [F.], seq 1, ack 5794, win 1448, options [nop,nop,TS val 1798130289 ecr
+3715919632], length 0
+H2 initiates the closure of its connection.
+22:52:01.936390 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [.], ack 2, win 512, options [nop,nop,TS val 3715919742 ecr 1798130289],
+length 0
+H1 acknowledges H2’s connection closure.
+22:52:02.243022 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [F.], seq 1, ack 5794, win 1448, options [nop,nop,TS val 1798130595 ecr
+3715919632], length 0
+H2 retransmits its closure request (likely H1’s acknowledgment was lost), ~300ms after its initial request, due to timeout.
+22:52:02.243047 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [.], ack 2, win 512, options [nop,nop,TS val 3715920048 ecr 1798130289],
+length 0
+H1 retransmits its acknowledgment to H2’s closure request.
+
+3. Reading from file tcp-error-r-eth1.cap
+22:51:59.035284 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [S], seq 3985537874, win 65504, options [mss 736,sackOK,TS val
+3715916640 ecr 0,nop,wscale 7], length 0
+22:51:59.035346 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [S.], seq 1788771642, ack 3985537875, win 2896, options [mss
+736,sackOK,TS val 1798127388 ecr 3715916640,nop,wscale 0], length 0
+6
+
+CSC 361 Spring 2024
+
+22:51:59.135604 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [.], ack 1, win 512, options [nop,nop,TS val 3715916841 ecr 1798127388],
+length 0
+22:51:59.135845 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [P.], seq 725:1449, ack 1, win 512, options [nop,nop,TS val 3715916841 ecr
+1798127388], length 724
+22:51:59.135885 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [.], ack 1, win 2896, options [nop,nop,TS val 1798127488 ecr
+3715916841,nop,nop,sack 1 {725:1449}], length 0
+22:51:59.135919 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [P.], seq 2173:2897, ack 1, win 512, options [nop,nop,TS val 3715916841 ecr
+1798127388], length 724
+22:51:59.135927 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [.], ack 1, win 2896, options [nop,nop,TS val 1798127488 ecr
+3715916841,nop,nop,sack 2 {2173:2897}{725:1449}], length 0
+22:51:59.274948 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [P.], seq 1:725, ack 1, win 512, options [nop,nop,TS val 3715916980 ecr
+1798127488], length 724
+22:51:59.274997 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [.], ack 1449, win 1448, options [nop,nop,TS val 1798127627 ecr
+3715916980,nop,nop,sack 1 {2173:2897}], length 0
+22:52:01.126936 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [P.], seq 1449:2173, ack 1, win 512, options [nop,nop,TS val 3715918832 ecr
+1798127627], length 724
+22:52:01.126997 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [.], ack 2897, win 1448, options [nop,nop,TS val 1798129479 ecr
+3715918832], length 0
+22:52:01.227094 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [.], seq 2897:3621, ack 1, win 512, options [nop,nop,TS val 3715918932 ecr
+1798129479], length 724
+22:52:01.227106 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [P.], seq 3621:4345, ack 1, win 512, options [nop,nop,TS val 3715918932 ecr
+1798129479], length 724
+22:52:01.227148 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [.], ack 4345, win 1448, options [nop,nop,TS val 1798129579 ecr
+3715918932], length 0
+22:52:01.327260 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [.], seq 4345:5069, ack 1, win 512, options [nop,nop,TS val 3715919033 ecr
+1798129579], length 724
+22:52:01.327340 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [.], ack 5069, win 1448, options [nop,nop,TS val 1798129680 ecr
+3715919033], length 0
+22:52:01.927140 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [FP.], seq 5069:5793, ack 1, win 512, options [nop,nop,TS val 3715919632 ecr
+1798129680], length 724
+22:52:01.927200 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [.], ack 5794, win 1448, options [nop,nop,TS val 1798130280 ecr
+3715919632], length 0
+22:52:01.936374 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [F.], seq 1, ack 5794, win 1448, options [nop,nop,TS val 1798130289 ecr
+3715919632], length 0
+7
+
+CSC 361 Spring 2024
+
+22:52:02.242980 IP 10.10.1.100.5001 > 192.168.1.100.32992: Flags [F.], seq 1, ack 5794, win 1448, options [nop,nop,TS val 1798130595 ecr
+3715919632], length 0
+22:52:02.343090 IP 192.168.1.100.32992 > 10.10.1.100.5001: Flags [.], ack 2, win 512, options [nop,nop,TS val 3715920048 ecr 1798130289],
+length 0
+Note: In the example above, by comparing the tcpdump trace files before and after where error occurs, you can identify which packets are lost.
+
+8
+
+

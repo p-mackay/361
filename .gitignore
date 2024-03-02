@@ -12,4 +12,7 @@ template*
 *.vtt
 kurose_videos/
 tutorial_videos/
+Reliable_UDP_Sockets_With_Flow-Control/
+p2/Reliable_UDP_Sockets_With_Flow-Control/
+p2/Reliable_Data_Transfer
 __pycache__/

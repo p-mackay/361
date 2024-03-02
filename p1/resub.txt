@@ -1,0 +1,11 @@
+All (General), if there were bugs in your P1 that prevented us from evaluating most of your work, you have until Monday, Feb 26th to resubmit. To do so, please do the following:
+
+
+	
+Make the nessesary changes/fixes to your sws.py, and create new capture files.
+	
+Re-upload your new sws.py, capture files, and a readme file called readme.txt that indicates (a) why you are requesting a regrade and (b) explains the changes you made in the code to fix the issue.
+	
+Send me a direct message on MS Teams indicating that you have resubmitted.
+
+Please only resubmit if there was a bug that affected a majority of the tests. If only a couple of tests failed, fixing these tests will not net you additional marks. Some marks will be lost based on the severity of the issue.

@@ -1,0 +1,243 @@
+CSC361: Tutorial 6
+●
+●
+●
+●
+
+P1 Feedback
+P2 Connection Management
+P2 Flow Control
+P2 Error Control
+
+P1
+●
+
+P1 marking done, marks should be out soon.
+
+Some comments from the markers:
+1.
+2.
+3.
+4.
+5.
+
+The most common issues where students lose marks are related with new line endings and CRLF,
+and missing or adding extra new lines in the response.
+Some implementations don’t support line-by-line queries.
+A few implementations hard coded the server ip and port, one implementation added extra
+server startup options.
+Extra debug logs are present in server logs in some implementations. Some cannot print the
+correct client ip and port in server logs. Some have extra space by the end of each line. Some have
+incorrect capitalization in the response headers.
+Some students didn't test their implementations on PicoLab, since there are very obvious issues
+which can be solved if they tested on PicoLab. (Might be related to different Python and OS
+settings.)
+2
+
+Review: RDP Connection Management
+Open a connection:
+1.
+2.
+
+The RDP sender sends SYN first to establish
+the connection with the RDP receiver
+The RDP receiver sends ACK to accept the
+connection
+
+Close a connection:
+1.
+2.
+
+The RDP sender sends FIN to close the
+connection
+RDP receiver sends back an ACK
+3
+
+RDP Flow Control
+Like TCP:
+●
+
+Sliding window flow control
+○
+○
+
+●
+
+The receiver side
+○
+○
+
+●
+
+Allows more data “in flight” than has been
+acknowledged
+Sender can get ahead of receiver, but not too far
+ahead
+maintains a receiver buffer
+continually advertises buffer space available to
+sender
+
+The sender side
+○
+
+limits the amount of data sent to avoid overflow
+of the receiver’s buffer
+
+4
+
+RDP Error Control
+●
+
+Sequence No. and Acknowledgment No.
+○
+○
+
+●
+
+Sender sends packets with sequence number so that the receiver can check whether there is any
+lost packets
+Receiver sends packets with acknowledgment number so that the sender can check whether
+receiver received all packets that have been sent
+
+Retransmission
+○
+○
+
+Retransmission after RTO (timeout)
+Retransmission after 3 duplicate ACK numbers in packets
+
+5
+
+6
+
+RDP Error Control: Go-Back-N (Sender)
+…
+def send(self):
+…
+if self.state == open:
+for seq in [snd_next, snd_una + window]:
+write rdp packet with seq into snd_buf
+update snd_next
+…
+def rcv_ack(self):
+…
+if self.state == open:
+if three duplicate ack received:
+for seq in [snd_una, snd_next]:
+write rdp packet with seq into snd_buf
+if ack# is correct:
+update snd_una and call send()
+…
+7
+
+RDP Error Control: Go-Back-N (Receiver)
+…
+def rcv_data(self):
+…
+if self.state == open:
+if data.seq < rcv_exp:
+drop packet
+if data.seq > rcv_exp:
+put the rdp with seq into a buffer data_buf
+return an RDP packet with duplicate ack
+if data.seq == rcv_exp:
+check data_buf and update rcv_exp
+return an ack RDP packet
+…
+8
+
+9
+
+RDP Error Control: Timeout
+●
+●
+
+Question: What should be the timeout value?
+State variables are defined for calculating the timeout:
+○
+○
+○
+○
+
+●
+
+srtt is smoothed round-trip time for averaging the round-trip time (RTT) of a segment
+rttvar holds the round-trip time variation
+rto eventually holds the retransmission timeout, e.g. in milliseconds
+Additionally, a clock granularity of g seconds is assumed
+
+The clock granularity of TCP implementations has traditionally been estimated to
+be fairly high, ranging from 500ms to 1s.
+○
+
+Modern systems like Linux, use a clock granularity of 1 millisecond
+
+10
+
+RDP Error Control: Timeout Cont’d
+1.
+2.
+
+3.
+
+Before the first RTT measurement:
+rto = 1000ms
+On the first RTT measurement r:
+srtt = r
+rttvar = r/2
+rto = srtt + max(g, 4 * rttvar)
+On subsequent measurements r:
+alpha = 0.125
+beta = 0.25
+rttvar = (1 - beta) * rttvar + beta * abs(srtt - r)
+srtt = (1 - alpha) * srtt + alpha * r
+rto = srtt + max(g, 4 * rttvar)
+11
+
+P2 Design Comments: Sockets
+●
+●
+
+You are required to use only one socket
+How to use one socket for both server and client?
+○
+○
+○
+
+Use select
+For readable socket, receive packets and check content of the packet. ACK goes to the state machine
+of the server, and SYN/DAT/FIN goes to the state machine of the client
+For writable socket, just send whatever in the sending buffer (queue)
+
+12
+
+P2 Design Comments: Packets
+●
+
+You may send or receive a big packet that consists of several small ACK/DAT
+packets
+○
+
+●
+
+We are using UDP to transport RDP data
+
+How to address it?
+○
+○
+
+Similar to P1, you need to use a queue to temporarily store the content of each received packet
+When reaching an end of an ACK or DATA, extract all content from the queue and process the
+content line by line
+
+13
+
+Sources
+●
+
+https://web.eecs.umich.edu/~sugih/courses/eecs489/lectures/30-TCP-Flow+AR
+Q.pdf
+
+14
+
+
