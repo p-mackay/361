@@ -35,6 +35,7 @@ def split_file(filename):
     return file_queue
 f_queue = split_file("rfc.txt")
 
+
 class State(Enum):
     CLOSED = "closed"
     SYN_SENT = "syn_sent"
@@ -48,6 +49,8 @@ class Rdp_sender:
         self.snd_base = 0 # oldest unacknowledged packet
         self.window = 0 #
         self.state = State.CLOSED
+        self.LastByteSent = 0
+        self.LastByteAcked = 0
 
 
     def open(self):
@@ -58,23 +61,17 @@ class Rdp_sender:
 
     def send(self):
         if self.state == State.OPEN:
-            count = 0
-            ##print(self.state)
-            ##print(self.snd_nxt, self.snd_base, self.window)
-
-            #print("hello")
             while True:
-                if (self.snd_nxt < self.snd_base + self.window):
+                if (self.snd_nxt < self.snd_base + self.window) and self.LastByteSent <= self.snd_nxt:
                     try:
                         msg = f_queue.get_nowait()
                     except queue.Empty:
                         break
-
                     dat_packet = "DAT\nSequence: {}\nLength: {}\n\n{}".format(self.snd_nxt, sys.getsizeof(msg), msg).encode()
-                    #print(dat_packet)
+                    print("SENDER;Sequence: {};Length: {};".format(self.snd_nxt, sys.getsizeof(msg)).encode())
                     snd_buf.put(dat_packet)
                     self.snd_nxt = self.snd_nxt + sys.getsizeof(msg)
-                    #print(self.snd_nxt)
+                    self.LastByteSent = self.snd_nxt
                 else:
                     break
 
@@ -83,15 +80,21 @@ class Rdp_sender:
             parts = message.decode().split('\n')
             if parts[0] == "ACK":
                 ack = int(parts[1].split(': ')[1])
-                wind = int(parts[2].split(': ')[1])
+                self.window = int(parts[2].split(': ')[1])
                 self.state = State.OPEN
         if self.state == State.OPEN:
+            #print(message)
             if message: 
-                print(message)
                 parts = message.decode().split('\n')
                 if parts[0] == "ACK":
                     ack = int(parts[1].split(': ')[1])
                     wind = int(parts[2].split(': ')[1])
+                    print("SENDER: Received;ACK: {};Window: {};".format(ack, wind))
+                    time.sleep(1)
+
+                    if ack > self.snd_base:
+                        self.snd_base = ack
+                    self.LastByteAcked = ack
                     self.window = wind
                     self.send()
 
@@ -106,30 +109,32 @@ class Rdp_sender:
 #----------------------------------------------------
 class Rdp_receiver:
     def __init__(self, udp_sock):
-        self.ack = 0
         self.seq_expected = 0
-        self.last_received = 0
-        self.last_read = 0
         self.state = State.CLOSED
-        self.buf_size = 2048
-        self.window = self.buf_size 
+        self.buf_size = 5120 
+        self.RcvBuffer = 5120  # Total buffer size
+        self.LastByteRcvd = 0  # Last byte received and stored in the buffer
+        self.LastByteRead = 0  # Last byte read by the application
+        self.rwnd = self.RcvBuffer
+        self.packet_buffer = queue.Queue()
+        self.count = 0
 
     def rcv_data(self, message):
         if self.state == State.CLOSED:
-            ##print("Received message: ", message)
             lines = message.decode().split('\n')
             header = lines[0]
             if header == "SYN":
                 seq_num = int(lines[1].split(': ')[1])
                 self.seq_expected = seq_num
                 self.rcv_nxt = seq_num + 1
-                ack_packet = "ACK\nAcknowledgment: {}\nWindow: {}\n\n".format(self.rcv_nxt, self.window).encode()
-                ##print("ACK\nAcknowledgment: {}\nWindow: {}\n\n".format(self.rcv_nxt, self.window).encode())
+                ack_packet = "ACK\nAcknowledgment: {}\nWindow: {}\n\n".format(self.rcv_nxt, self.RcvBuffer).encode()
                 snd_buf.put(ack_packet)
                 self.state = State.OPEN
         elif self.state == State.OPEN:
-            ##print("receiver state: ", self.state)
-            ##print("REceived DATA message: ", message)
+
+            self.packet_buffer.put(message)
+            self.count += 1
+            #print(self.count)
             lines = message.decode().split('\n\n')
             header = lines[0]
             data = lines[1]
@@ -137,12 +142,21 @@ class Rdp_receiver:
             command = parts[0]
             seq = int(parts[1].split(': ')[1])
             len = int(parts[2].split(': ')[1])
-            self.seq_expected = seq + len
-
+            print("RECEIVER: Received;Sequence: {};Length: {};".format(seq, len))
             if command == "DAT":
-                self.rcv_nxt = seq + 1
-                ack_packet = "ACK\nAcknowledgment: {}\nWindow: {}\n\n".format(self.rcv_nxt, self.window).encode()
+
+                self.seq_expected = seq + len
+                self.LastByteRcvd = seq + len
+
+                with open('output.txt', 'a') as file:
+                    file.write(data)
+                    self.LastByteRead = self.LastByteRead + len
+
+                self.rwnd = self.RcvBuffer - (self.LastByteRcvd - self.LastByteRead)
+                #print(self.LastByteRcvd, self.LastByteRead)
+                ack_packet = f"ACK\nAcknowledgment: {self.seq_expected}\nWindow: {self.rwnd}\n\n".encode()
                 snd_buf.put(ack_packet)
+                #time.sleep(1)
 
 
 
@@ -158,10 +172,8 @@ while True:
         message, addr = udp_sock.recvfrom(1024)
         if message.decode().startswith("ACK"):
             rdp_sender.rcv_ack(message)
-            print("rcv_ack: ", message)
         else: 
             rdp_receiver.rcv_data(message)
-            print("rcv_data: ", message)
 
     if udp_sock in writable:
 
