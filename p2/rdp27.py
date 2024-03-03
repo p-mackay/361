@@ -45,58 +45,59 @@ class State(Enum):
 #----------------------------------------------------
 class Rdp_sender:
     def __init__(self, udp_sock):
-        self.snd_nxt = 0
+        self.sequence_number = 0
         self.snd_base = 0 # oldest unacknowledged packet
         self.window = 0 #
+        self.max_window = 5120  #
         self.state = State.CLOSED
         self.LastByteSent = 0
         self.LastByteAcked = 0
+        self.rwnd = 0
 
 
     def open(self):
-        syn_packet = "SYN\nSequence: {}\nLength: {}\n\n".format(0, 0).encode()
+        syn_packet = "SYN\nSequence: {}\nLength: {}\n\n".format(0, 0).encode('utf-8')
         snd_buf.put(syn_packet)
         self.state = State.SYN_SENT
-        ##print("Sender: SYN\nSequence: {}\nLength: {}\n\n".format(0, 0).encode())
+        ##print("Sender: SYN\nSequence: {}\nLength: {}\n\n".format(0, 0).encode('utf-8'))
 
     def send(self):
         if self.state == State.OPEN:
-            while True:
-                if (self.snd_nxt < self.snd_base + self.window) and self.LastByteSent <= self.snd_nxt:
-                    try:
-                        msg = f_queue.get_nowait()
-                    except queue.Empty:
-                        break
-                    dat_packet = "DAT\nSequence: {}\nLength: {}\n\n{}".format(self.snd_nxt, sys.getsizeof(msg), msg).encode()
-                    print("SENDER;Sequence: {};Length: {};".format(self.snd_nxt, sys.getsizeof(msg)).encode())
-                    snd_buf.put(dat_packet)
-                    self.snd_nxt = self.snd_nxt + sys.getsizeof(msg)
-                    self.LastByteSent = self.snd_nxt
-                else:
+            print(self.LastByteSent,  self.LastByteAcked)
+            while (self.LastByteSent - self.LastByteAcked < self.rwnd):
+                print(self.LastByteSent,  self.LastByteAcked)
+                print(self.rwnd)
+                try:
+                    msg = f_queue.get_nowait()
+                except queue.Empty:
                     break
+                dat_packet = "DAT\nSequence: {}\nLength: {}\n\n{}".format(self.sequence_number, sys.getsizeof(msg), msg).encode('utf-8')
+                print("SENDER;Sequence: {};Length: {};".format(self.sequence_number, sys.getsizeof(msg)).encode('utf-8'))
+                self.sequence_number = self.sequence_number + sys.getsizeof(msg)
+                self.LastByteSent = self.sequence_number
+                snd_buf.put(dat_packet)
 
     def rcv_ack(self, message):
         if self.state == State.SYN_SENT:
-            parts = message.decode().split('\n')
+            parts = message.decode('utf-8').split('\n')
             if parts[0] == "ACK":
-                ack = int(parts[1].split(': ')[1])
-                self.window = int(parts[2].split(': ')[1])
+                ack_number = int(parts[1].split(': ')[1])
+                self.rwnd = int(parts[2].split(': ')[1])
                 self.state = State.OPEN
         if self.state == State.OPEN:
-            #print(message)
-            if message: 
-                parts = message.decode().split('\n')
-                if parts[0] == "ACK":
-                    ack = int(parts[1].split(': ')[1])
-                    wind = int(parts[2].split(': ')[1])
-                    print("SENDER: Received;ACK: {};Window: {};".format(ack, wind))
-                    time.sleep(1)
+            parts = message.decode('utf-8').split('\n')
+            if parts[0] == "ACK":
+                ack_number = int(parts[1].split(': ')[1])
+                self.rwnd = int(parts[1].split(': ')[1])
+                print(ack_number)
+                print("SENDER: Received;ACK: {};Window: {};".format(ack_number, self.rwnd))
 
-                    if ack > self.snd_base:
-                        self.snd_base = ack
-                    self.LastByteAcked = ack
-                    self.window = wind
-                    self.send()
+                if ack_number > self.snd_base:
+                    self.snd_base = ack_number
+                self.LastByteAcked = ack_number
+                self.sequence_number = ack_number + 1
+                self.send()
+
 
     def getstate(self):
         return self.state
@@ -121,13 +122,13 @@ class Rdp_receiver:
 
     def rcv_data(self, message):
         if self.state == State.CLOSED:
-            lines = message.decode().split('\n')
+            lines = message.decode('utf-8').split('\n')
             header = lines[0]
             if header == "SYN":
                 seq_num = int(lines[1].split(': ')[1])
                 self.seq_expected = seq_num
                 self.rcv_nxt = seq_num + 1
-                ack_packet = "ACK\nAcknowledgment: {}\nWindow: {}\n\n".format(self.rcv_nxt, self.RcvBuffer).encode()
+                ack_packet = "ACK\nAcknowledgment: {}\nWindow: {}\n\n".format(self.rcv_nxt, self.RcvBuffer).encode('utf-8')
                 snd_buf.put(ack_packet)
                 self.state = State.OPEN
         elif self.state == State.OPEN:
@@ -135,7 +136,7 @@ class Rdp_receiver:
             self.packet_buffer.put(message)
             self.count += 1
             #print(self.count)
-            lines = message.decode().split('\n\n')
+            lines = message.decode('utf-8').split('\n\n')
             header = lines[0]
             data = lines[1]
             parts = header.split('\n')
@@ -154,7 +155,7 @@ class Rdp_receiver:
 
                 self.rwnd = self.RcvBuffer - (self.LastByteRcvd - self.LastByteRead)
                 #print(self.LastByteRcvd, self.LastByteRead)
-                ack_packet = f"ACK\nAcknowledgment: {self.seq_expected}\nWindow: {self.rwnd}\n\n".encode()
+                ack_packet = f"ACK\nAcknowledgment: {self.seq_expected}\nWindow: {self.rwnd}\n\n".encode('utf-8')
                 snd_buf.put(ack_packet)
                 #time.sleep(1)
 
@@ -170,7 +171,8 @@ while True:
 
     if udp_sock in readable:
         message, addr = udp_sock.recvfrom(1024)
-        if message.decode().startswith("ACK"):
+
+        if message.decode('utf-8').startswith("ACK"):
             rdp_sender.rcv_ack(message)
         else: 
             rdp_receiver.rcv_data(message)

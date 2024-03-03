@@ -46,8 +46,7 @@ class rdp_sender:
         self.max_window_size = 5 
 
 
-    def send_data(self):
-        time.sleep(1)
+    def send_data(self, message):
         with open(filename, "rb") as file:
             #Socket creation and set the timeout
 
@@ -60,9 +59,10 @@ class rdp_sender:
                 if self.packet_count - self.sequence_number >= self.window_size:
                     try:
                         # Wait for ACK message from the server to move the window forward
-                        ack, server_address = udp_socket.recvfrom(BUFFER_SIZE)
-                        print("ACK-----------------{}".format(ack.decode('utf-8') ))
-                        ack_number = int(ack.decode('utf-8'))
+                        
+                        parts = message.decode('utf-8').split('\n')
+                        ack_number = int(parts[1].split(': ')[1])
+                        #ack_number = int(ack.decode('utf-8'))
                         print(f"Acknowledgement : {ack_number}")
                         if ack_number >= self.sequence_number:
                             # Update the window size dynamically based on the ACK received
@@ -73,7 +73,8 @@ class rdp_sender:
                         # Timeout occurred, resend the self.packets in the current window
                         print("Timeout occurred, resending self.packets in the current window")
                         for i in range(self.sequence_number, self.packet_count):
-                            udp_socket.sendto(self.packets[i].encode('utf-8'), (UDP_IP_ADDRESS, UDP_PORT_NO))
+                            #udp_socket.sendto(self.packets[i].encode('utf-8'), (UDP_IP_ADDRESS, UDP_PORT_NO))
+                            snd_buf.put(self.packets[i].encode('utf-8'))
 
                 # Read a chunk of data from the file
                 data = file.read(PACKET_SIZE)
@@ -86,7 +87,8 @@ class rdp_sender:
                 packet = header + checksum + data.decode('utf-8')
 
                 # Send the packet to the receiver and add it to the window
-                udp_socket.sendto(packet.encode('utf-8'), (UDP_IP_ADDRESS, UDP_PORT_NO))
+                #udp_socket.sendto(packet.encode('utf-8'), (UDP_IP_ADDRESS, UDP_PORT_NO))
+                snd_buf.put(packet.encode('utf-8'))
                 self.packets.append(packet)
 
                 # Increment the packet count
@@ -97,8 +99,10 @@ class rdp_sender:
             while self.sequence_number < self.packet_count:
                 try:
                     # Wait for ACK message from the receiver to move the window forward
-                    ack, server_address = udp_socket.recvfrom(BUFFER_SIZE)
-                    ack_number = int(ack.decode('utf-8'))
+                    #ack, server_address = udp_socket.recvfrom(BUFFER_SIZE)
+                    #ack_number = int(ack.decode('utf-8'))
+                    parts = message.decode('utf-8').split('\n')
+                    ack_number = int(parts[1].split(': ')[1])
                     print(f"Acknowledgement : {ack_number}")
                     if ack_number >= self.sequence_number:
                         # Update the window size dynamically based on the ACK received
@@ -109,7 +113,8 @@ class rdp_sender:
                     # Timeout occurred, resend the self.packets in the current window
                     print("Timeout occurred, resending self.packets in the current window")
                     for i in range(self.sequence_number, self.packet_count):
-                        udp_socket.sendto(self.packets[i], (UDP_IP_ADDRESS, UDP_PORT_NO))
+                        #udp_socket.sendto(self.packets[i], (UDP_IP_ADDRESS, UDP_PORT_NO))
+                        snd_buf.put(self.packets[i])
 
         #Empty Packet to show end of file
         header = str(self.packet_count).zfill(4)
@@ -125,7 +130,6 @@ class rdp_sender:
 
 class rdp_receiver:
     def read_data(self, packet):
-        time.sleep(1)
         filename = "received_file.txt" 
         with open(filename, "w") as file:
             # Create a UDP socket
@@ -144,7 +148,8 @@ class rdp_receiver:
                     # If the sequence number is incorrect, request the sender to resend the packet
                     print("Sequence no is incorrect, request resend ")
 
-                    udp_socket.sendto(header.encode('utf-8'), client_address)
+                    #udp_socket.sendto(header.encode('utf-8'), client_address)
+                    snd_buf.put(header.encode('utf-8'))
 
                     continue
 
@@ -154,7 +159,8 @@ class rdp_receiver:
                 file.write(payload)
 
                 # Send ACK message to the client
-                udp_socket.sendto(header.encode('utf-8'), client_address)
+                #udp_socket.sendto(header.encode('utf-8'), client_address)
+                snd_buf.put(header.encode('utf-8'))
 
                 # Increment the expected sequence number
                 expected_sequence_number += 1
@@ -171,24 +177,21 @@ class rdp_receiver:
             received_file_size = os.path.getsize(filename)
             print(f"Received file size: {received_file_size} bytes")
 
-
 def main():
+    print("hello")
     receiver = rdp_receiver()
     sender = rdp_sender()
 
-
-    sender.send_data()
-    receiver.read_data()
 # Main loop
     while True:
-        readable, writable, _ = select.select([udp_socket], [udp_sock], [], 1)
+        readable, writable, _ = select.select([udp_socket], [udp_socket], [], 1)
 
         if udp_socket in readable:
             message, addr = udp_socket.recvfrom(1024)
             if message.decode().startswith("ACK"):
-                rdp_sender.rcv_ack(message)
+                sender.send_data(message)
             else: 
-                rdp_receiver.rcv_data(message)
+                receiver.read_data(message)
 
         if udp_socket in writable:
 
@@ -198,7 +201,7 @@ def main():
                 break
 
             else:
-                bytes_sent = udp_socket.sendto(msg, (ip, port))
+                bytes_sent = udp_socket.sendto(msg, (UDP_IP_ADDRESS, UDP_PORT_NO ))
 
 
 if __name__ == "__main__":
